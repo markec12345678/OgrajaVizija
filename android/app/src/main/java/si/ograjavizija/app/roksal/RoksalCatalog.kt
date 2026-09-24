@@ -202,6 +202,7 @@ object RoksalCatalog {
         RoksalComponent("TERRACE_CLIP", "Začetni distančnik / distančnik", "kos", "Za pravilne dilatacije in montažo."),
         RoksalComponent("TERRACE_GRID", "Alu mreža za podkonstrukcijo", "kos", "Za pripravljeno stabilno podlago, kadar je predvidena mrežna rešitev."),
         RoksalComponent("TERRACE_RUBBER", "Gumijasta podloga", "kos", "Za hidroizolacijo brez vijačenja v podlago."),
+        RoksalComponent("TERRACE_INOX_SCREW", "Inox vijaki za teraso", "kos", "Količino in dolžino vijakov določi končna podkonstrukcija in izvedba."),
         RoksalComponent("FACADE_CLIP", "Fasadni klip", "kos", "Za pritrditev določenih fasadnih WoodCore profilov."),
         RoksalComponent("KUBO_CORE", "Notranja aluminijasta cev KUBO", "tekoči m", "Profil KUBO zahteva ustrezno notranjo alu/RF rešitev glede na izvedbo in razpon."),
         RoksalComponent("KUBO_20X60", "Aluminijasta cev 20 × 60 × 2 mm", "tekoči m", "Za KUBO razpone nad 120 cm do 260 cm."),
