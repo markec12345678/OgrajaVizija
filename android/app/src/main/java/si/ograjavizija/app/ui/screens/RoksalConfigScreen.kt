@@ -566,7 +566,7 @@ fun RoksalConfigScreen(
                     singleLine = true
                 )
             }
-            if (category == RoksalCategory.OGRAJA || category == RoksalCategory.PREGRADNA_STENA || category == RoksalCategory.FASADA || category == RoksalCategory.NAPUSC) {
+            if (category == RoksalCategory.OGRAJA || category == RoksalCategory.PREGRADNA_STENA) {
                 Spacer(Modifier.height(8.dp))
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     OutlinedTextField(
@@ -584,7 +584,10 @@ fun RoksalConfigScreen(
                         singleLine = true
                     )
                 }
-            } else if (category == RoksalCategory.FASADA || category == RoksalCategory.NAPUSC) {
+            } else if (category == RoksalCategory.FASADA ||
+                category == RoksalCategory.NAPUSC ||
+                category == RoksalCategory.STROP
+            ) {
                 Spacer(Modifier.height(8.dp))
                 OutlinedTextField(
                     value = supportSpacing.toInt().toString(),
