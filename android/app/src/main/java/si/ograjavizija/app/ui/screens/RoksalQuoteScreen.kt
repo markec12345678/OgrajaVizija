@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -15,6 +16,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -37,6 +39,7 @@ fun RoksalQuoteScreen(
     onHome: () -> Unit,
 ) {
     val context = LocalContext.current
+    val scope = rememberCoroutineScope()
     var project by remember { mutableStateOf<Project?>(null) }
 
     LaunchedEffect(projectId) {
@@ -128,7 +131,9 @@ fun RoksalQuoteScreen(
                 onClick = {
                     val current = p
                     if (current != null) {
-                        project = ProjectStore.save(current.copy(status = ProjectStatus.QUOTE_REQUESTED))
+                        scope.launch {
+                            project = ProjectStore.save(current.copy(status = ProjectStatus.QUOTE_REQUESTED))
+                        }
                     }
                     val intent = Intent(Intent.ACTION_SEND).apply {
                         type = "text/plain"
