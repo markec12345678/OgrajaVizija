@@ -46,12 +46,21 @@ data class ValidationResult(
     val warnings: List<String>,
 )
 
+data class RoksalComponent(
+    val id: String,
+    val name: String,
+    val unit: String,
+    val note: String = "",
+)
+
 data class MaterialEstimate(
     val boards: Int,
     val stockLengthM: Float,
     val posts: Int,
     val supports: Int,
     val screws: Int,
+    val handles: Int,
+    val components: List<RoksalComponent>,
     val estimatedWastePercent: Int,
     val notes: List<String>,
 )
@@ -161,6 +170,19 @@ object RoksalCatalog {
         ),
     )
 
+    val components = listOf(
+        RoksalComponent("HANDLE_92", "Ročaj za ograjo 92 × 45 × 5800 mm", "kos", "Priporočena spojna dolžina največ 4 m."),
+        RoksalComponent("RF_SCREW", "RF vijaki", "kos", "Predvrtanje je obvezno; luknja zaradi raztezanja."),
+        RoksalComponent("ROMB_ALU", "Aluminijasta cev za ROMB", "kos", "Pri ROMB je alu cev v sredini obvezna."),
+        RoksalComponent("ROMB_CAP_LR", "Čepi za ROMB levo/desno", "komplet", "Zaključek koncev ROMB profila."),
+        RoksalComponent("L_BRACKET", "L-kotnik", "kos", "Uporablja se pri pritrditvi ROMB na steber."),
+        RoksalComponent("TERRACE_SUB", "WPC podložna letev 40 × 30 × 2200 mm", "kos", "Podkonstrukcija terase."),
+        RoksalComponent("TERRACE_ALU", "Alu podložna cev", "kos", "Dolžina 6 m; višina je odvisna od izvedbe."),
+        RoksalComponent("TERRACE_TRIM", "Zaključna letev 45 × 55 mm", "kos", "Na voljo v več standardnih dolžinah."),
+        RoksalComponent("TERRACE_CLIP", "Začetni distančnik / distančnik", "kos", "Za pravilne dilatacije in montažo."),
+        RoksalComponent("FACADE_CLIP", "Fasadni klip", "kos", "Za pritrditev določenih fasadnih WoodCore profilov."),
+    )
+
     private val profileMap = profiles.associateBy { it.id }
     private val colourMap = colours.associateBy { it.id }
 
@@ -223,9 +245,7 @@ object RoksalCatalog {
     }
 
     fun estimate(c: RoksalConfig): MaterialEstimate {
-        val p = profileMap[c.profileId] ?: return MaterialEstimate(
-            0, 0f, 0, 0, 0, 0, listOf("Profil ni znan.")
-        )
+        val p = profileMap[c.profileId] ?: return MaterialEstimate(0, 0f, 0, 0, 0, 0, emptyList(), 0, listOf("Profil ni znan."))
         val gap = max(0, c.boardGapMm)
         val pitchMm = max(1, p.faceWidthMm + gap)
         val posts = max(2, ceil(c.lengthM * 100f / max(1f, c.postSpacingCm)).toInt() + 1)
@@ -243,6 +263,8 @@ object RoksalCatalog {
                 posts = posts,
                 supports = supports,
                 screws = verticalBoards * 2,
+                handles = if (c.category == RoksalCategory.OGRAJA && c.handleIncluded) 1 else 0,
+                components = componentsFor(c),
                 estimatedWastePercent = 8,
                 notes = listOf(
                     "Izračun je informativen in ne nadomešča Roksal razreza.",
@@ -260,6 +282,8 @@ object RoksalCatalog {
                 posts = posts,
                 supports = posts,
                 screws = rows * piecesPerRow * 2,
+                handles = if (c.category == RoksalCategory.OGRAJA && c.handleIncluded) 1 else 0,
+                components = componentsFor(c),
                 estimatedWastePercent = 10,
                 notes = listOf(
                     "Izračun je informativen in predvideva polne vrste po podani dolžini.",
@@ -267,6 +291,25 @@ object RoksalCatalog {
                 )
             )
         }
+    }
+
+    fun componentsFor(c: RoksalConfig): List<RoksalComponent> {
+        val out = mutableListOf<RoksalComponent>()
+        if (c.category == RoksalCategory.OGRAJA && c.handleIncluded) out += components.first { it.id == "HANDLE_92" }
+        out += components.first { it.id == "RF_SCREW" }
+        if (c.profileId == "ROMB67") {
+            out += components.first { it.id == "ROMB_ALU" }
+            out += components.first { it.id == "ROMB_CAP_LR" }
+            if (c.orientation == RoksalOrientation.PRECNA) out += components.first { it.id == "L_BRACKET" }
+        }
+        if (c.category == RoksalCategory.TERASA) {
+            out += components.first { it.id == "TERRACE_SUB" }
+            out += components.first { it.id == "TERRACE_ALU" }
+            out += components.first { it.id == "TERRACE_TRIM" }
+            out += components.first { it.id == "TERRACE_CLIP" }
+        }
+        if (c.category == RoksalCategory.FASADA) out += components.first { it.id == "FACADE_CLIP" }
+        return out.distinctBy { it.id }
     }
 
     fun renderTechnicalPreview(config: RoksalConfig, width: Int = 1200, height: Int = 700): Bitmap {
