@@ -15,6 +15,7 @@ Za pravi release signing dodaš `signingConfigs` v `app/build.gradle.kts` in Pla
 
 ### CI (brez lokalnega okolja)
 Push na GitHub → Actions → `android-apk` → artifact `apk-debug` / `apk-release-unsigned`.
+Prvi uspešen run: **35959990105** (vsi koraki success, vključno z JVM testi 26/26 na runnerju).
 
 ### Znana omejitev sandbox okolja (dokumentirano, ne skrito)
 Gradnja v okolju z **1 GB RAM (cgroup)** pade pri `:app:compileDebugKotlin`

@@ -1,5 +1,7 @@
 # 🏗 OgrajaVizija
 
+[![android-apk](https://github.com/markec12345678/OgrajaVizija/actions/workflows/android.yml/badge.svg)](https://github.com/markec12345678/OgrajaVizija/actions/workflows/android.yml)
+
 **»Kako bo moj dejanski balkon izgledal z mojo dejansko ograjo?«**
 
 Android aplikacija + samostojen AI backend za fotorealistično vizualizacijo izdelkov na fotografiji.
@@ -29,8 +31,8 @@ porobi robove, uskladi svetlobo in doda sence — vse pod strogo zaščito origi
 | Lokalno inpaintanje (clean plate) deluje | ✅ | Δ od originala 157,7 → 6,2 |
 | Celotna Kotlin koda (24 datotek, Compose) se prevede | ✅ | kotlinc 2.0.21 + Compose + serialization plugin, 0 napak |
 | Celoten lokalni pipeline na realni sliki | ✅ | `tools/jvmtest/out/real_*` (pred/po/clean plate; generirano lokalno, ni v repoju) |
-| **APK zgrajen v tem okolju** | ⚠️ **NE** | gradbeno okolje ima 1 GB RAM (cgroup) → `compileDebugKotlin` OOM. CI workflow (`.github/workflows/android.yml`) zgradi APK na GitHub runnerju |
-| **AI finalizacija (FLUX.2/Qwen) preizkušena** | ⚠️ **NE** | potreben GPU; priložen `backend/scripts/test_pipeline.py`, ki preveri tudi zaščito originala |
+| **APK zgrajen** | ✅ **DA** (GitHub Actions) | run `35959990105`: vsi koraki success; artifacta **apk-debug** (86,8 MB) in **apk-release-unsigned** (80,6 MB). Lokalni sandbox z 1 GB RAM ne zmore AGP — zato CI. |
+| **AI finalizacija (FLUX.2/Qwen) preizkušena** | ⚠️ **NE** | potreben GPU (~8–13 GB VRAM); priložen `backend/scripts/test_pipeline.py`, ki preveri tudi zaščito originala (`leakage_ratio == 0`) |
 
 > Načelo (zahteva 16): ničesar ne trdimo, česar nismo preizkusili. Zgoraj je meja med
 > *dokazano* in *pripravljeno za testiranje na tvojem GPU-ju*.
@@ -59,6 +61,12 @@ research/base/      klon predlaganega osnovnega repoja (MIT) — samo referenca
 ```
 
 ---
+
+## APK
+
+Najlažje: **Actions → android-apk → zadnji uspešen run → Artifacts** (`apk-debug`, `apk-release-unsigned`).
+Debug APK namestiš z `adb install app-debug.apk`. Release je za sideload/teste podpisan z debug ključem;
+za Play dodaj svoj keystore v `app/build.gradle.kts`.
 
 ## Hiter začetek
 
