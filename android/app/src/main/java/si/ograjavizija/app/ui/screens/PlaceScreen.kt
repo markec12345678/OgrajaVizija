@@ -58,6 +58,7 @@ fun PlaceScreen(projectId: String?, onNext: () -> Unit, onBack: () -> Unit) {
     var dragIdx by remember { mutableIntStateOf(-1) }
     var busy by remember { mutableStateOf(false) }
     var previewJob by remember { mutableStateOf<Job?>(null) }
+    var previewRevision by remember { mutableIntStateOf(0) }
 
     fun recompute() {
         val s = scene ?: return
@@ -65,7 +66,10 @@ fun PlaceScreen(projectId: String?, onNext: () -> Unit, onBack: () -> Unit) {
         val pl = placement ?: return
         if (!pl.isValid) return
         previewJob?.cancel()
+        val revision = previewRevision + 1
+        previewRevision = revision
         previewJob = scope.launch {
+            kotlinx.coroutines.delay(80)
             val bmp = withContext(Dispatchers.Default) {
                 val sw = s.width; val sh = s.height
                 val px = IntArray(sw * sh); s.getPixels(px, 0, sw, 0, 0, sw, sh)
@@ -81,7 +85,7 @@ fun PlaceScreen(projectId: String?, onNext: () -> Unit, onBack: () -> Unit) {
                 android.graphics.Bitmap.createBitmap(sw, sh, android.graphics.Bitmap.Config.ARGB_8888)
                     .also { it.setPixels(r.pixels, 0, sw, 0, 0, sw, sh) }
             }
-            preview = bmp
+            if (revision == previewRevision) preview = bmp
         }
     }
 
