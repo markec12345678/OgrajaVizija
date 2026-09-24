@@ -310,6 +310,7 @@ async def create_inquiry(
         "projectId": str(project.get("id", "")),
         "projectName": str(project.get("name", "")),
         "category": str((project.get("config") or {}).get("category", "")),
+        "customerName": str((project.get("config") or {}).get("customerName", "")),
     }
     total = 0
     try:
