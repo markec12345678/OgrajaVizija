@@ -327,7 +327,6 @@ fun RoksalConfigScreen(
                 Spacer(Modifier.height(8.dp))
                 FilterChip(
                     selected = handleIncluded,
-                    selected = handleIncluded,
                     onClick = { handleIncluded = !handleIncluded },
                     label = { Text(if (handleIncluded) "Vključi zgornji ročaj" else "Brez zgornjega ročaja") }
                 )
