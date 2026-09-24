@@ -143,6 +143,33 @@ fun MaskScreen(projectId: String?, onNext: () -> Unit, onBack: () -> Unit) {
                     Slider(value = brush, onValueChange = { brush = it }, valueRange = 6f..160f, modifier = Modifier.weight(1f))
                 }
                 if (rectStart != null) Text("Pravokotnik: tapni še nasprotni vogal.", color = Warn, style = MaterialTheme.typography.labelSmall)
+                Button(
+                    onClick = {
+                        val e = editor ?: return@Button
+                        val s2 = s
+                        if (!segReady || autoBusy) return@Button
+                        autoBusy = true
+                        status = "Samodejno označujem ograjo…"
+                        scope.launch {
+                            val m = withContext(Dispatchers.Default) {
+                                OnDeviceSegmenter.segmentAutomatic(s2)
+                            }
+                            if (m != null) {
+                                e.beginStroke()
+                                e.setFromSegmentation(m, s2.width, s2.height)
+                                refresh()
+                                status = "🟢 Samodejna maska pripravljena — po potrebi popravi ročno."
+                            } else {
+                                status = "⚠️ ${OnDeviceSegmenter.lastError ?: "Samodejna segmentacija ni uspela"}"
+                            }
+                            autoBusy = false
+                        }
+                    },
+                    enabled = segReady && !autoBusy,
+                    modifier = Modifier.fillMaxWidth(),
+                ) {
+                    Text(if (autoBusy) "⏳ Samodejno…" else "✨ Samodejno označi ograjo")
+                }
                 Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     Button(onClick = {
                         val e = editor ?: return@Button
