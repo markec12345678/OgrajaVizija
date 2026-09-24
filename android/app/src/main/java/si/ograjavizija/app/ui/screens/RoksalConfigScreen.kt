@@ -109,11 +109,17 @@ fun RoksalConfigScreen(
     var companyName by remember { mutableStateOf("") }
     var taxNumber by remember { mutableStateOf("") }
     var invoiceAddress by remember { mutableStateOf("") }
+    var invoicePostalCode by remember { mutableStateOf("") }
+    var invoiceCity by remember { mutableStateOf("") }
     var deliveryAddressDifferent by remember { mutableStateOf(false) }
     var deliveryAddress by remember { mutableStateOf("") }
+    var deliveryPostalCode by remember { mutableStateOf("") }
+    var deliveryCity by remember { mutableStateOf("") }
     var phone by remember { mutableStateOf("") }
     var email by remember { mutableStateOf("") }
     var address by remember { mutableStateOf("") }
+    var projectPostalCode by remember { mutableStateOf("") }
+    var projectCity by remember { mutableStateOf("") }
     var notes by remember { mutableStateOf("") }
     var dataConsent by remember { mutableStateOf(false) }
     var termsAccepted by remember { mutableStateOf(false) }
@@ -169,6 +175,8 @@ fun RoksalConfigScreen(
             companyName = old.companyName
             taxNumber = old.taxNumber
             invoiceAddress = old.invoiceAddress
+            invoicePostalCode = old.invoicePostalCode
+            invoiceCity = old.invoiceCity
             deliveryAddressDifferent = old.deliveryAddressDifferent
             deliveryAddress = old.deliveryAddress
             phone = old.phone
@@ -262,9 +270,15 @@ fun RoksalConfigScreen(
             phone = phone,
             email = email,
             invoiceAddress = invoiceAddress,
+            invoicePostalCode = invoicePostalCode,
+            invoiceCity = invoiceCity,
             deliveryAddressDifferent = deliveryAddressDifferent,
             deliveryAddress = deliveryAddress,
+            deliveryPostalCode = deliveryPostalCode,
+            deliveryCity = deliveryCity,
             address = address,
+            projectPostalCode = projectPostalCode,
+            projectCity = projectCity,
             dataProcessingConsent = dataConsent,
             termsAccepted = termsAccepted,
             newsletterOptIn = newsletterOptIn,
@@ -711,14 +725,29 @@ fun RoksalConfigScreen(
                 OutlinedTextField(email, { email = it }, label = { Text("E-pošta") }, modifier = Modifier.weight(1f), singleLine = true)
             }
             Spacer(Modifier.height(6.dp))
-            OutlinedTextField(invoiceAddress, { invoiceAddress = it }, label = { Text("Naslov za račun") }, modifier = Modifier.fillMaxWidth(), singleLine = true)
+            OutlinedTextField(invoiceAddress, { invoiceAddress = it }, label = { Text("Ulica in hišna št. za račun") }, modifier = Modifier.fillMaxWidth(), singleLine = true)
             Spacer(Modifier.height(6.dp))
-            OutlinedTextField(address, { address = it }, label = { Text("Lokacija projekta") }, modifier = Modifier.fillMaxWidth(), singleLine = true)
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                OutlinedTextField(invoicePostalCode, { invoicePostalCode = it }, label = { Text("Poštna št.") }, modifier = Modifier.weight(1f), singleLine = true)
+                OutlinedTextField(invoiceCity, { invoiceCity = it }, label = { Text("Kraj") }, modifier = Modifier.weight(2f), singleLine = true)
+            }
+            Spacer(Modifier.height(6.dp))
+            OutlinedTextField(address, { address = it }, label = { Text("Ulica in hišna št. projekta") }, modifier = Modifier.fillMaxWidth(), singleLine = true)
+            Spacer(Modifier.height(6.dp))
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                OutlinedTextField(projectPostalCode, { projectPostalCode = it }, label = { Text("Poštna št. projekta") }, modifier = Modifier.weight(1f), singleLine = true)
+                OutlinedTextField(projectCity, { projectCity = it }, label = { Text("Kraj projekta") }, modifier = Modifier.weight(2f), singleLine = true)
+            }
             Spacer(Modifier.height(6.dp))
             FilterChip(selected = deliveryAddressDifferent, onClick = { deliveryAddressDifferent = !deliveryAddressDifferent }, label = { Text("Dostava na drug naslov") })
             if (deliveryAddressDifferent) {
                 Spacer(Modifier.height(6.dp))
-                OutlinedTextField(deliveryAddress, { deliveryAddress = it }, label = { Text("Naslov dostave") }, modifier = Modifier.fillMaxWidth(), singleLine = true)
+                OutlinedTextField(deliveryAddress, { deliveryAddress = it }, label = { Text("Ulica in hišna št. dostave") }, modifier = Modifier.fillMaxWidth(), singleLine = true)
+                Spacer(Modifier.height(6.dp))
+                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    OutlinedTextField(deliveryPostalCode, { deliveryPostalCode = it }, label = { Text("Poštna št.") }, modifier = Modifier.weight(1f), singleLine = true)
+                    OutlinedTextField(deliveryCity, { deliveryCity = it }, label = { Text("Kraj") }, modifier = Modifier.weight(2f), singleLine = true)
+                }
             }
             Spacer(Modifier.height(6.dp))
             OutlinedTextField(notes, { notes = it }, label = { Text("Opombe") }, modifier = Modifier.fillMaxWidth(), minLines = 2)
