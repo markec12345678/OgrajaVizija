@@ -41,7 +41,7 @@ private fun roksalEnquiryUrl(category: RoksalCategory): String = when (category)
     RoksalCategory.TERASA -> "https://roksal.com/wpc-povprasevanje/povprasevanje-wpc-terasa/"
     RoksalCategory.FASADA -> "https://roksal.com/wpc-povprasevanje/povprasevanje-wpc-fasade/"
     RoksalCategory.PREGRADNA_STENA -> "https://roksal.com/wpc-povprasevanje/povprasevanje-pregradna-stena/"
-    RoksalCategory.NAPUSC -> "https://roksal.com/wpc-povprasevanje/povprasevanje-napusc-in-strop/"
+    RoksalCategory.NAPUSC -> "https://roksal.com/wpc-povprasevanje/"
 }
 
 @Composable
@@ -88,6 +88,7 @@ fun RoksalQuoteScreen(
             appendLine("Smer: " + (c?.orientation?.name ?: "POKONCNA"))
             appendLine("Profil: " + (profile?.name ?: ""))
             appendLine("Dimenzija profila: " + (profile?.dimensions ?: ""))
+            appendLine("Katalogni vir: " + (profile?.catalogUrl ?: "https://roksal.com/woodcore-wpc-deske/"))
             appendLine("Barva: " + (c?.let { RoksalCatalog.colour(it.colourId).name } ?: ""))
             if (!c?.mountingVariant.isNullOrBlank()) appendLine("Način polaganja: " + c?.mountingVariant)
             if (!c?.surfaceId.isNullOrBlank()) appendLine("Površina: " + c?.surfaceId)
@@ -120,7 +121,6 @@ fun RoksalQuoteScreen(
             appendLine("Način določitve mer: " + (c?.measurementMethod?.name ?: "ZNANE_MERE"))
             appendLine("Dostava: " + (c?.deliveryPreference?.name ?: "NEVEM"))
             appendLine("Zahtevan razrez: " + if (c?.cuttingRequested == true) "DA" else "NE")
-            appendLine("Razrez: " + if (c?.cuttingRequested == true) "DA" else "NE")
             appendLine("Tip ograje: " + (c?.fenceType?.name ?: "NEVEM"))
             appendLine("Pritrditev stebrov: " + (c?.postFixing?.name ?: "NEVEM"))
             appendLine("Izgled stebrov: " + (c?.postAppearance?.name ?: "NEVEM"))

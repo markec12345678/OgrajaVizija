@@ -31,12 +31,12 @@ import si.ograjavizija.app.data.ProjectStore
 import si.ograjavizija.app.ui.components.StepHeader
 import si.ograjavizija.app.ui.theme.Muted
 import si.ograjavizija.app.ui.theme.SurfaceAlt
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
+import androidx.compose.runtime.rememberCoroutineScope
 import kotlinx.coroutines.launch
 
 @Composable
 fun RoksalProjectsScreen(onBack: () -> Unit) {
+    val scope = rememberCoroutineScope()
     var projects by remember { mutableStateOf(ProjectStore.list()) }
     var filter by remember { mutableStateOf<ProjectStatus?>(null) }
 
@@ -123,7 +123,7 @@ private fun ProjectAdminRow(project: Project, onChanged: () -> Unit) {
                             text = { Text(statusLabel(next)) },
                             onClick = {
                                 expanded = false
-                                CoroutineScope(Dispatchers.IO).launch {
+                                scope.launch {
                                     ProjectStore.save(project.copy(status = next))
                                     onChanged()
                                 }

@@ -15,3 +15,4 @@ backend/.venv/
 docs/slike/
 hs_err_pid*.log
 tools/aarx/
+replay_pid*.log
