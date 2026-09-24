@@ -33,6 +33,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.draw.drawWithContent
+import androidx.compose.ui.graphics.drawscope.clipRect
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.launch
 import si.ograjavizija.app.data.AppState
@@ -135,23 +137,33 @@ fun ResultScreen(projectId: String?, onNewRailing: () -> Unit, onBack: () -> Uni
         Box(Modifier.weight(1f).padding(12.dp)) {
             val b = before; val a = after
             if (b != null && a != null) {
-                // PREJ | POTEM z drsnikom
-                val w = minOf(b.width, a.width); val h = minOf(b.height, a.height)
-                val merged = remember(mix, a, b) {
-                    val m = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888)
-                    val cut = (w * mix).toInt().coerceIn(0, w)
-                    val pb = IntArray(w * h); b.getPixels(pb, 0, w, 0, 0, w, h)
-                    val pa = IntArray(w * h); a.getPixels(pa, 0, w, 0, 0, w, h)
-                    for (y in 0 until h) for (x in 0 until w) {
-                        m.setPixel(x, y, if (x < cut) pb[y * w + x] else pa[y * w + x])
-                    }
-                    m
+                // PREJ | POTEM brez ustvarjanja novega Bitmapa ob vsakem premiku drsnika.
+                // Obe sliki ostaneta izvirni; POTEM se samo izriše skozi levi delni izrez.
+                Box(Modifier.fillMaxSize()) {
+                    androidx.compose.foundation.Image(
+                        bitmap = b.asImageBitmap(),
+                        contentDescription = null,
+                        modifier = Modifier.fillMaxSize(),
+                        contentScale = androidx.compose.ui.layout.ContentScale.Fit,
+                    )
+                    androidx.compose.foundation.Image(
+                        bitmap = a.asImageBitmap(),
+                        contentDescription = null,
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .drawWithContent {
+                                clipRect(
+                                    left = 0f,
+                                    top = 0f,
+                                    right = size.width * mix.coerceIn(0f, 1f),
+                                    bottom = size.height,
+                                ) {
+                                    drawContent()
+                                }
+                            },
+                        contentScale = androidx.compose.ui.layout.ContentScale.Fit,
+                    )
                 }
-                androidx.compose.foundation.Image(
-                    bitmap = merged.asImageBitmap(), contentDescription = null,
-                    modifier = Modifier.fillMaxSize(),
-                    contentScale = androidx.compose.ui.layout.ContentScale.Fit,
-                )
             } else {
                 Text("Klikni 🟢 Lokalno za prvi izris.", color = Muted, modifier = Modifier.padding(8.dp))
             }
