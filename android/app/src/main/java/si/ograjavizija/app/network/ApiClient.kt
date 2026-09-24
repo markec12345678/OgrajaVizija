@@ -7,6 +7,7 @@ import kotlinx.coroutines.withContext
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import si.ograjavizija.app.data.AiProvider
+import si.ograjavizija.app.data.Project
 import si.ograjavizija.app.imaging.BitmapIo
 import java.io.ByteArrayOutputStream
 import java.net.HttpURLConnection
@@ -50,6 +51,71 @@ object ApiClient {
         val changedOutsideMask: Int = -1,
         val message: String = "",
     )
+
+    @Serializable
+    data class InquiryRequest(
+        val project: Project,
+        val inquiryText: String,
+    )
+
+    @Serializable
+    data class InquiryResponse(
+        val ok: Boolean = false,
+        val inquiryId: String = "",
+        val status: String = "",
+        val receivedAt: Long = 0L,
+        val message: String = "",
+    )
+
+    @Serializable
+    data class InquiryHealth(
+        val ok: Boolean = false,
+        val total: Int = 0,
+        val lastStatus: String = "",
+    )
+
+    suspend fun inquiryHealth(baseUrl: String, token: String): InquiryHealth = withContext(Dispatchers.IO) {
+        val body = get(baseUrl, "/inquiries/health", token)
+        json.decodeFromString<InquiryHealth>(body)
+    }
+
+    suspend fun submitInquiry(
+        baseUrl: String,
+        token: String,
+        project: Project,
+        inquiryText: String,
+        attachments: List<java.io.File>,
+    ): InquiryResponse = withContext(Dispatchers.IO) {
+        require(token.isNotBlank()) { "Manjka Roksal inbox token." }
+        val payload = json.encodeToString(
+            InquiryRequest.serializer(),
+            InquiryRequest(project = project, inquiryText = inquiryText)
+        )
+        val parts = mutableListOf<Part>(Part.Text("payload", payload))
+        attachments.forEach { file ->
+            if (file.exists() && file.length() > 0L) {
+                parts += Part.File(
+                    name = file.nameWithoutExtension,
+                    filename = file.name,
+                    mime = when {
+                        file.name.endsWith(".png", ignoreCase = true) -> "image/png"
+                        else -> "image/jpeg"
+                    },
+                    data = file.readBytes(),
+                )
+            }
+        }
+        val out = ByteArrayOutputStream()
+        writeMultipart(out, "boundaryOgraja", parts)
+        val body = postRaw(
+            baseUrl,
+            "/inquiries",
+            out.toByteArray(),
+            "multipart/form-data; boundary=boundaryOgraja",
+            token,
+        )
+        json.decodeFromString<InquiryResponse>(body.decodeToString())
+    }
 
     suspend fun health(baseUrl: String): Health = withContext(Dispatchers.IO) {
         val body = get(baseUrl, "/health")
@@ -125,13 +191,13 @@ object ApiClient {
 
     // ------------------------------------------------------------ http
 
-    private fun get(base: String, path: String): String {
-        val c = open(base, path, "GET")
+    private fun get(base: String, path: String, token: String = ""): String {
+        val c = open(base, path, "GET", token)
         return try { c.inputStream.readBytes().decodeToString() } finally { c.disconnect() }
     }
 
-    private fun postRaw(base: String, path: String, body: ByteArray, contentType: String): ByteArray {
-        val c = open(base, path, "POST")
+    private fun postRaw(base: String, path: String, body: ByteArray, contentType: String, token: String = ""): ByteArray {
+        val c = open(base, path, "POST", token)
         c.doOutput = true
         c.setRequestProperty("Content-Type", contentType)
         c.outputStream.use { it.write(body) }
@@ -142,7 +208,7 @@ object ApiClient {
         } finally { c.disconnect() }
     }
 
-    private fun open(base: String, path: String, method: String): HttpURLConnection {
+    private fun open(base: String, path: String, method: String, token: String = ""): HttpURLConnection {
         require(base.isNotBlank()) { "Nastavi naslov strežnika v Nastavitvah" }
         val url = URL(base.trimEnd('/') + path)
         val c = url.openConnection() as HttpURLConnection
@@ -150,6 +216,7 @@ object ApiClient {
         c.connectTimeout = 15_000
         c.readTimeout = 600_000   // difuzija lahko traja
         c.setRequestProperty("Accept", "*/*")
+        if (token.isNotBlank()) c.setRequestProperty("Authorization", "Bearer " + token.trim())
         return c
     }
 
