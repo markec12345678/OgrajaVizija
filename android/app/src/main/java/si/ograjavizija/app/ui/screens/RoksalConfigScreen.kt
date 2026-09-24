@@ -44,6 +44,11 @@ import si.ograjavizija.app.data.PostAppearance
 import si.ograjavizija.app.data.CustomerType
 import si.ograjavizija.app.data.MeasurementMethod
 import si.ograjavizija.app.data.DeliveryPreference
+import si.ograjavizija.app.data.TerraceBase
+import si.ograjavizija.app.data.TerraceSubstructure
+import si.ograjavizija.app.data.TerraceDirection
+import si.ograjavizija.app.data.FacadeLayout
+import si.ograjavizija.app.data.KuboReinforcement
 import si.ograjavizija.app.data.Project
 import si.ograjavizija.app.data.ProjectController
 import si.ograjavizija.app.data.ProjectStore
@@ -113,6 +118,16 @@ fun RoksalConfigScreen(
     var newsletterOptIn by remember { mutableStateOf(false) }
     var status by remember { mutableStateOf("") }
     var showRecommendations by remember { mutableStateOf(false) }
+    var terraceWidth by remember { mutableFloatStateOf(0f) }
+    var terraceSlope by remember { mutableFloatStateOf(1f) }
+    var terraceHeight by remember { mutableFloatStateOf(5.5f) }
+    var terraceBase by remember { mutableStateOf(TerraceBase.NEVEM) }
+    var terraceSubstructure by remember { mutableStateOf(TerraceSubstructure.NEVEM) }
+    var terraceDirection by remember { mutableStateOf(TerraceDirection.NEVEM) }
+    var terraceScrewToBase by remember { mutableStateOf(false) }
+    var facadeLayout by remember { mutableStateOf(FacadeLayout.NEVEM) }
+    var facadeOpeningNotes by remember { mutableStateOf("") }
+    var kuboReinforcement by remember { mutableStateOf(KuboReinforcement.NEVEM) }
 
     val options = RoksalCatalog.profilesFor(category, orientation)
     val p = project
@@ -158,6 +173,16 @@ fun RoksalConfigScreen(
             email = old.email
             address = old.address
             notes = old.notes
+            terraceWidth = old.terraceWidthM
+            terraceSlope = old.terraceSlopeCmPerM
+            terraceHeight = old.terraceHeightCm
+            terraceBase = old.terraceBase
+            terraceSubstructure = old.terraceSubstructure
+            terraceDirection = old.terraceDirection
+            terraceScrewToBase = old.terraceScrewToBase
+            facadeLayout = old.facadeLayout
+            facadeOpeningNotes = old.facadeOpeningNotes
+            kuboReinforcement = old.kuboReinforcement
             dataConsent = old.dataProcessingConsent
             termsAccepted = old.termsAccepted
             newsletterOptIn = old.newsletterOptIn
