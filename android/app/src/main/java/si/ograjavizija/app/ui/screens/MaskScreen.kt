@@ -52,6 +52,8 @@ fun MaskScreen(projectId: String?, onNext: () -> Unit, onBack: () -> Unit) {
     var status by remember { mutableStateOf("") }
     var rectStart by remember { mutableStateOf<Pair<Float, Float>?>(null) }
     var segReady by remember { mutableStateOf(false) }
+    val sceneImage = remember(scene) { scene?.copy(android.graphics.Bitmap.Config.ARGB_8888, false)?.asImageBitmap() }
+    val maskImage = remember(maskBmp) { maskBmp?.asImageBitmap() }
 
     LaunchedEffect(projectId) {
         val p = projectId?.let { ProjectStore.load(it) } ?: AppState.currentProject ?: return@LaunchedEffect
@@ -76,7 +78,7 @@ fun MaskScreen(projectId: String?, onNext: () -> Unit, onBack: () -> Unit) {
         val s = scene
         if (s != null) {
             ZoomPanBox(
-                image = s.copy(android.graphics.Bitmap.Config.ARGB_8888, false).asImageBitmap(),
+                image = sceneImage!!,
                 modifier = Modifier.weight(1f),
                 onTap = { x, y ->
                     val e = editor ?: return@ZoomPanBox
@@ -120,7 +122,7 @@ fun MaskScreen(projectId: String?, onNext: () -> Unit, onBack: () -> Unit) {
                 onUp = { },
                 overlay = {
                     maskBmp?.let { m ->
-                        drawImage(m.asImageBitmap(), alpha = 1f)
+                        drawImage(maskImage!!, alpha = 1f)
                     }
                 },
             )
