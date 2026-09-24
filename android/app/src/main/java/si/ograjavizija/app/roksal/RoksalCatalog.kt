@@ -32,6 +32,8 @@ data class RoksalProfile(
     val requiresAluCore: Boolean = false,
     val colourCount: Int,
     val surfaceOptions: List<String> = emptyList(),
+    val mountingOptions: List<String> = emptyList(),
+    val colourIds: List<String> = emptyList(),
     val notes: String,
 )
 
@@ -92,7 +94,9 @@ object RoksalCatalog {
             maxPostVerticalCm = 150,
             hiddenFixing = true,
             colourCount = 4,
-            notes = "Pokončna izvedba; deska se lahko montira na 57 ali 32 mm stran; skrito vijačenje."
+            mountingOptions = listOf("57 mm", "32 mm", "Razgibano"),
+            colourIds = listOf("AMAZON_WOOD", "ASH_WOOD", "GOLDEN_TEAK", "BURMA_TEAK"),
+            notes = "Pokončna izvedba; deska se lahko montira na 57 ali 32 mm stran ali razgibano; skrito vijačenje. Roksalove javne strani imajo glede števila barv neskladje, zato je zaloga vedno za preverjanje."
         ),
         RoksalProfile(
             id = "P100",
@@ -106,7 +110,8 @@ object RoksalCatalog {
             maxPostVerticalCm = 180,
             hiddenFixing = false,
             colourCount = 8,
-            notes = "Samo pokončna izvedba; vijaki so vidni z lica."
+            colourIds = listOf("AMAZON_WOOD", "ASH_WOOD", "GOLDEN_TEAK", "BURMA_TEAK", "OAK_WOOD", "WHITE", "RUSTIC_OAK", "RUSTIC_WALNUT"),
+            notes = "Pokončna; vijaki so vidni z lica. Bela je na Roksalovem obrazcu označena kot možnost samo za polno desko 10 cm."
         ),
         RoksalProfile(
             id = "P128",
@@ -121,7 +126,8 @@ object RoksalCatalog {
             maxPostHorizontalCm = 110,
             hiddenFixing = false,
             colourCount = 6,
-            notes = "Pokončna ali prečna izvedba; Roksal javno navaja priporočeni razmak med deskami 0,5–3 cm."
+            colourIds = listOf("AMAZON_WOOD", "ASH_WOOD", "GOLDEN_TEAK", "BURMA_TEAK", "OAK_WOOD"),
+            notes = "Pokončna ali prečna izvedba; Roksal na trenutni barvni strani navaja 5 odtenkov, medtem ko druga stran navaja 6; aplikacija zato ne dodaja šestega nepreverjenega odtenka."
         ),
         RoksalProfile(
             id = "ROMB67",
@@ -137,7 +143,8 @@ object RoksalCatalog {
             hiddenFixing = true,
             requiresAluCore = true,
             colourCount = 7,
-            notes = "Pri ograji je aluminijasta cev v sredini obvezna; skrito vijačenje."
+            colourIds = listOf("AMAZON_WOOD", "ASH_WOOD", "GOLDEN_TEAK", "BURMA_TEAK", "OAK_WOOD", "RUSTIC_OAK", "RUSTIC_WALNUT"),
+            notes = "Pri ograji je aluminijasta cev v sredini obvezna; skrito vijačenje. Brez alu cevi montaža ni mogoča."
         ),
         RoksalProfile(
             id = "DESKA150",
@@ -151,7 +158,8 @@ object RoksalCatalog {
             hiddenFixing = false,
             colourCount = 7,
             surfaceOptions = listOf("KLASIK", "RUSTIK"),
-            notes = "Prečna izvedba; terasni profil z različnima površinama KLASIK/RUSTIK."
+            colourIds = listOf("AMAZON_WOOD", "ASH_WOOD", "GOLDEN_TEAK", "BURMA_TEAK", "OAK_WOOD", "RUSTIC_OAK", "RUSTIC_WALNUT"),
+            notes = "Prečna izvedba; profil 150 ima več površinskih izvedb. Za ograjo so vijaki vidni."
         ),
         RoksalProfile(
             id = "KUBO8042",
@@ -166,7 +174,9 @@ object RoksalCatalog {
             hiddenFixing = true,
             requiresAluCore = true,
             colourCount = 4,
-            notes = "Predvsem fasade/pregradne stene; notranja aluminijasta cev vpliva na konstrukcijo in razpon."
+            mountingOptions = listOf("80 mm", "42 mm", "Razgibano"),
+            colourIds = listOf("AMAZON_WOOD", "OAK_WOOD", "RUSTIC_OAK", "RUSTIC_WALNUT"),
+            notes = "Predvsem fasade/pregradne stene; notranja aluminijasta cev vpliva na konstrukcijo in razpon. 5000 mm dolžina je po Roksalu odvisna od razpoložljivosti odtenka."
         ),
     )
 
@@ -205,7 +215,8 @@ object RoksalCatalog {
     }
 
     fun colourOptions(profile: RoksalProfile): List<RoksalColour> =
-        colours.take(profile.colourCount)
+        if (profile.colourIds.isNotEmpty()) profile.colourIds.mapNotNull { colourMap[it] }
+        else colours.take(profile.colourCount)
 
     fun validate(c: RoksalConfig): ValidationResult {
         val p = profileMap[c.profileId] ?: return ValidationResult(false, listOf("Napaka: izbran profil ne obstaja."))
