@@ -215,6 +215,10 @@ fun RoksalConfigScreen(
                 orientation = RoksalOrientation.POKONCNA
                 supportSpacing = 70f
             }
+            RoksalCategory.STROP -> {
+                orientation = RoksalOrientation.POKONCNA
+                supportSpacing = 70f
+            }
             RoksalCategory.FASADA -> {
                 if (profile?.id == "P100") supportSpacing = 50f
                 if (profile?.id == "ROMB67") supportSpacing = 80f
