@@ -236,6 +236,8 @@ object RoksalCatalog {
                 profiles.filter { it.id in setOf("P100", "ROMB67", "KUBO8042") }.filter(supportsOrientation)
             RoksalCategory.TERASA -> profiles.filter { it.id == "DESKA150" }
             RoksalCategory.NAPUSC ->
+                profiles.filter { it.id in setOf("P100", "ROMB67") }.filter(supportsOrientation)
+            RoksalCategory.STROP ->
                 profiles.filter { it.id in setOf("P100", "ROMB67", "KUBO8042") }.filter(supportsOrientation)
         }
     }
@@ -252,7 +254,7 @@ object RoksalCatalog {
             else -> p.maxSupportCm
         }
         RoksalCategory.TERASA -> 35
-        RoksalCategory.OGRAJA, RoksalCategory.PREGRADNA_STENA, RoksalCategory.NAPUSC -> p.maxSupportCm
+        RoksalCategory.OGRAJA, RoksalCategory.PREGRADNA_STENA, RoksalCategory.NAPUSC, RoksalCategory.STROP -> p.maxSupportCm
     }
 
     fun maxPostCmFor(c: RoksalConfig, p: RoksalProfile): Int? = when (c.category) {
