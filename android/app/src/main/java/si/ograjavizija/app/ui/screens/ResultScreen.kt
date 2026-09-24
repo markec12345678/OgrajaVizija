@@ -152,13 +152,14 @@ fun ResultScreen(projectId: String?, onNewRailing: () -> Unit, onBack: () -> Uni
                         modifier = Modifier
                             .fillMaxSize()
                             .drawWithContent {
+                                val outerScope = this
                                 clipRect(
                                     left = 0f,
                                     top = 0f,
                                     right = size.width * mix.coerceIn(0f, 1f),
                                     bottom = size.height,
                                 ) {
-                                    this@drawWithContent.drawContent()
+                                    outerScope.drawContent()
                                 }
                             },
                         contentScale = androidx.compose.ui.layout.ContentScale.Fit,
