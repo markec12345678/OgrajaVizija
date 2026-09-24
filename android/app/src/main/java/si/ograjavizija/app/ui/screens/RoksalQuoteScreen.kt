@@ -20,6 +20,7 @@ import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -64,7 +65,9 @@ fun RoksalQuoteScreen(
     onHome: () -> Unit,
 ) {
     val context = LocalContext.current
+    val scope = rememberCoroutineScope()
     var project by remember { mutableStateOf<Project?>(null) }
+    var inboxBusy by remember { mutableStateOf(false) }
     var inboxStatus by remember { mutableStateOf("") }
 
     LaunchedEffect(projectId) {
@@ -228,14 +231,15 @@ fun RoksalQuoteScreen(
                 Text("📋 Kopiraj povpraševanje")
             }
             OutlinedButton(
-                enabled = readyForInquiry && AppState.serverUrl.isNotBlank() && AppState.inquiryToken.isNotBlank() && inboxStatus.isEmpty(),
+                enabled = readyForInquiry && AppState.serverUrl.isNotBlank() && AppState.inquiryToken.isNotBlank() && !inboxBusy,
                 onClick = {
                     val current = p ?: return@OutlinedButton
                     val files = listOf("original.jpg", "result.jpg", "product.jpg")
                         .map { ProjectStore.file(current, it) }
                         .filter { it.exists() && it.length() > 0L }
                     inboxStatus = "⏳ Pošiljam v lasten Roksal inbox…"
-                    kotlinx.coroutines.CoroutineScope(kotlinx.coroutines.Dispatchers.Main).launch {
+                    inboxBusy = true
+                    scope.launch {
                         runCatching {
                             ApiClient.submitInquiry(
                                 baseUrl = AppState.serverUrl,
@@ -252,6 +256,7 @@ fun RoksalQuoteScreen(
                         }.onFailure { e ->
                             inboxStatus = "⚠️ Inbox: " + (e.message ?: "pošiljanje ni uspelo")
                         }
+                        inboxBusy = false
                     }
                 },
                 modifier = Modifier.fillMaxWidth()
