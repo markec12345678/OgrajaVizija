@@ -190,8 +190,23 @@ fun RoksalConfigScreen(
     }
 
     LaunchedEffect(category) {
-        if (category == RoksalCategory.TERASA) orientation = RoksalOrientation.PRECNA
-        if (category == RoksalCategory.NAPUSC) orientation = RoksalOrientation.POKONCNA
+        when (category) {
+            RoksalCategory.TERASA -> {
+                orientation = RoksalOrientation.PRECNA
+                gapMm = 5.5f
+                supportSpacing = 34f
+            }
+            RoksalCategory.NAPUSC -> {
+                orientation = RoksalOrientation.POKONCNA
+                supportSpacing = 70f
+            }
+            RoksalCategory.FASADA -> {
+                if (profile?.id == "P100") supportSpacing = 50f
+                if (profile?.id == "ROMB67") supportSpacing = 80f
+                if (profile?.id == "KUBO8042") supportSpacing = 100f
+            }
+            else -> Unit
+        }
     }
 
     LaunchedEffect(category, orientation) {
@@ -522,6 +537,97 @@ fun RoksalConfigScreen(
                     modifier = Modifier.weight(1f),
                     singleLine = true
                 )
+            }
+
+            if (category == RoksalCategory.TERASA) {
+                Spacer(Modifier.height(10.dp))
+                Text("Terasa · podlaga in montaža", style = MaterialTheme.typography.titleMedium)
+                Text(
+                    "Roksal navaja 5–6 mm med deskami, podkonstrukcijo približno 33–35 cm in padec najmanj 1 cm/m.",
+                    color = Muted,
+                    style = MaterialTheme.typography.labelSmall
+                )
+                Text("Padec: " + "%.1f".format(java.util.Locale.US, terraceSlope) + " cm/m")
+                Slider(value = terraceSlope, onValueChange = { terraceSlope = it }, valueRange = 0f..3f)
+                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    OutlinedTextField(
+                        value = terraceHeight.toString(),
+                        onValueChange = { it.toFloatOrNull()?.let { terraceHeight = it } },
+                        label = { Text("Končna višina cm") },
+                        modifier = Modifier.weight(1f),
+                        singleLine = true
+                    )
+                    Text("Fuga: " + gapMm.toInt() + " mm", modifier = Modifier.weight(1f).padding(top = 16.dp), style = MaterialTheme.typography.bodySmall)
+                }
+                Text("Podlaga", style = MaterialTheme.typography.titleSmall)
+                Row(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.horizontalScroll(rememberScrollState())) {
+                    val bases = listOf(
+                        TerraceBase.BETON to "Beton",
+                        TerraceBase.PLOSCICE to "Ploščice",
+                        TerraceBase.HIDROIZOLACIJA to "Hidroizolacija",
+                        TerraceBase.PESek to "Pesek",
+                        TerraceBase.ZEMLJA_TRAVA to "Zemlja / trava",
+                        TerraceBase.NEVEM to "Ne vem"
+                    )
+                    bases.forEach { (value, label) ->
+                        FilterChip(selected = terraceBase == value, onClick = { terraceBase = value }, label = { Text(label) })
+                    }
+                }
+                Text("Podkonstrukcija", style = MaterialTheme.typography.titleSmall)
+                Row(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.horizontalScroll(rememberScrollState())) {
+                    val subs = listOf(
+                        TerraceSubstructure.WPC_LETVE to "WPC letve",
+                        TerraceSubstructure.ALU_CEV to "Alu cevi",
+                        TerraceSubstructure.ALU_MREZA to "Alu mreža",
+                        TerraceSubstructure.KOVINSKA_KONSTRUKCIJA to "Kovinska",
+                        TerraceSubstructure.NEVEM to "Ne vem"
+                    )
+                    subs.forEach { (value, label) ->
+                        FilterChip(selected = terraceSubstructure == value, onClick = { terraceSubstructure = value }, label = { Text(label) })
+                    }
+                }
+                Text("Smer desk", style = MaterialTheme.typography.titleSmall)
+                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    FilterChip(selected = terraceDirection == TerraceDirection.V_SMER_PADCA, onClick = { terraceDirection = TerraceDirection.V_SMER_PADCA }, label = { Text("V smeri padca") })
+                    FilterChip(selected = terraceDirection == TerraceDirection.PRAVOKOTNO_NA_PADEC, onClick = { terraceDirection = TerraceDirection.PRAVOKOTNO_NA_PADEC }, label = { Text("Pravokotno") })
+                    FilterChip(selected = terraceDirection == TerraceDirection.NEVEM, onClick = { terraceDirection = TerraceDirection.NEVEM }, label = { Text("Ne vem") })
+                }
+                FilterChip(
+                    selected = terraceScrewToBase,
+                    onClick = { terraceScrewToBase = !terraceScrewToBase },
+                    label = { Text(if (terraceScrewToBase) "Vijačenje v podlago" else "Brez vijačenja v podlago") }
+                )
+            }
+
+            if (category == RoksalCategory.FASADA) {
+                Spacer(Modifier.height(10.dp))
+                Text("Fasada · razpored in odprtine", style = MaterialTheme.typography.titleMedium)
+                Row(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.horizontalScroll(rememberScrollState())) {
+                    FilterChip(selected = facadeLayout == FacadeLayout.ENOTEN, onClick = { facadeLayout = FacadeLayout.ENOTEN }, label = { Text("Enoten videz") })
+                    FilterChip(selected = facadeLayout == FacadeLayout.MESAN, onClick = { facadeLayout = FacadeLayout.MESAN }, label = { Text("Mešan videz") })
+                    FilterChip(selected = facadeLayout == FacadeLayout.NEVEM, onClick = { facadeLayout = FacadeLayout.NEVEM }, label = { Text("Ne vem") })
+                }
+                OutlinedTextField(
+                    value = facadeOpeningNotes,
+                    onValueChange = { facadeOpeningNotes = it },
+                    label = { Text("Okna/vrata · mere ali brez odprtin") },
+                    modifier = Modifier.fillMaxWidth(),
+                    minLines = 2
+                )
+                if (current?.id == "KUBO8042") {
+                    Text("KUBO · notranja ojačitev", style = MaterialTheme.typography.titleSmall)
+                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.horizontalScroll(rememberScrollState())) {
+                        val kubo = listOf(
+                            KuboReinforcement.BREZ_DO_120 to "Do 120 cm · brez",
+                            KuboReinforcement.ALU_20X60_DO_260 to "120–260 cm · 20×60×2",
+                            KuboReinforcement.PROJEKTNA_OJACITEV to "Nad 260 cm · projektna",
+                            KuboReinforcement.NEVEM to "Ne vem"
+                        )
+                        kubo.forEach { (value, label) ->
+                            FilterChip(selected = kuboReinforcement == value, onClick = { kuboReinforcement = value }, label = { Text(label) })
+                        }
+                    }
+                }
             }
 
             if (category == RoksalCategory.OGRAJA || category == RoksalCategory.FASADA || category == RoksalCategory.PREGRADNA_STENA) {
