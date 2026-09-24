@@ -46,7 +46,7 @@ private fun roksalEnquiryUrl(category: RoksalCategory): String = when (category)
 
 @Composable
 private fun candidateAttachmentNote(project: Project): String? {
-    val files = listOf("original.jpg", "result.jpg")
+    val files = listOf("original.jpg", "result.jpg", "product.jpg")
         .map { ProjectStore.file(project, it) }
         .filter { it.exists() }
     return if (files.sumOf { it.length() } > 25L * 1024L * 1024L)

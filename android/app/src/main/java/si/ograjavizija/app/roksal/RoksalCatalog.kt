@@ -230,7 +230,7 @@ object RoksalCatalog {
 
     fun maxSupportCmFor(c: RoksalConfig, p: RoksalProfile): Int? = when (c.category) {
         RoksalCategory.FASADA -> when (p.id) {
-            "P100" -> 50
+            "P100" -> if (c.orientation == RoksalOrientation.POKONCNA) 50 else 80
             "ROMB67" -> 80
             "KUBO8042" -> 100
             else -> p.maxSupportCm
@@ -407,7 +407,9 @@ object RoksalCatalog {
         if (c.category == RoksalCategory.OGRAJA && c.handleIncluded) {
             out += components.first { it.id == "HANDLE_92" }
         }
-        out += components.first { it.id == "RF_SCREW" }
+        if (c.category != RoksalCategory.TERASA && c.category != RoksalCategory.FASADA) {
+            out += components.first { it.id == "RF_SCREW" }
+        }
 
         if (c.profileId == "ROMB67") {
             out += components.first { it.id == "ROMB_ALU" }
@@ -419,6 +421,7 @@ object RoksalCatalog {
 
         when (c.category) {
             RoksalCategory.TERASA -> {
+                out += components.first { it.id == "TERRACE_INOX_SCREW" }
                 out += components.first { it.id == "TERRACE_SUB" }
                 out += components.first { it.id == "TERRACE_ALU" }
                 out += components.first { it.id == "TERRACE_TRIM" }

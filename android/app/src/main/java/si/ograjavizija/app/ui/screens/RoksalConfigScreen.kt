@@ -288,7 +288,7 @@ fun RoksalConfigScreen(
             dataProcessingConsent = dataConsent,
             termsAccepted = termsAccepted,
             newsletterOptIn = newsletterOptIn,
-            consentAtMillis = consentAtMillis,
+            consentAtMillis = if (dataConsent && termsAccepted) consentAtMillis.takeIf { it > 0L } ?: System.currentTimeMillis() else 0L,
             notes = notes,
         )
     }
