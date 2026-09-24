@@ -86,7 +86,8 @@ object OnDeviceSegmenter {
                 .setPoints(listOf(NormalizedKeypoint.create(normX.coerceIn(0f, 1f), normY.coerceIn(0f, 1f))))
                 .setCompleted(true)
                 .build()
-            val out: MPImage = s.segment(listOf(stroke)) ?: return null
+            val strokes: List<Stroke> = listOf(stroke)
+            val out: MPImage = s.segment(strokes) ?: return null
             val w = out.width; val h = out.height
             val buf = ByteBufferExtractor.extract(out).asFloatBuffer()
             val floats = FloatArray(w * h)

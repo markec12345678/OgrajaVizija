@@ -50,7 +50,7 @@ fun SettingsScreen(onBack: () -> Unit) {
         )
         Spacer(Modifier.height(8.dp))
         OutlinedButton(onClick = {
-            AppState.setServerUrl(url)
+            AppState.updateServerUrl(url)
             scope.launch {
                 health = runCatching {
                     val h = ApiClient.health(AppState.serverUrl)

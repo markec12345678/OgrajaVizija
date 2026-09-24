@@ -29,7 +29,7 @@ object AppState {
 
     fun setProject(p: Project?) { currentProject = p }
 
-    fun setServerUrl(url: String) {
+    fun updateServerUrl(url: String) {
         serverUrl = url.trim().trimEnd('/')
         persist()
     }

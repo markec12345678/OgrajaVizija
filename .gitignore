@@ -14,3 +14,4 @@ __pycache__/
 backend/.venv/
 docs/slike/
 hs_err_pid*.log
+tools/aarx/

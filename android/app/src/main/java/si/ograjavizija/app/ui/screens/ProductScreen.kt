@@ -67,14 +67,6 @@ fun ProductScreen(projectId: String?, onNext: () -> Unit, onBack: () -> Unit) {
         overlayBmp = e.toBitmap()
     }
 
-    val camPerm = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { }
-    val takePic = rememberLauncherForActivityResult(ActivityResultContracts.TakePicture()) { ok ->
-        if (ok) pendingUri?.let { u -> scope.launch { loadProduct(u) } }
-    }
-    val pickPic = rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri ->
-        uri?.let { scope.launch { loadProduct(it.toString()) } }
-    }
-
     suspend fun loadProduct(uri: String) {
         val p = project ?: return
         val (np, how) = ProjectController.setProduct(ctx, p, uri, AppState.serverUrl.let {
@@ -83,6 +75,14 @@ fun ProductScreen(projectId: String?, onNext: () -> Unit, onBack: () -> Unit) {
         np?.let { project = it; AppState.setProject(it) }
         status = "Izrez: $how"
         refreshCutout()
+    }
+
+    val camPerm = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { }
+    val takePic = rememberLauncherForActivityResult(ActivityResultContracts.TakePicture()) { ok ->
+        if (ok) pendingUri?.let { u -> scope.launch { loadProduct(u) } }
+    }
+    val pickPic = rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri ->
+        uri?.let { scope.launch { loadProduct(it.toString()) } }
     }
 
     LaunchedEffect(projectId) {
