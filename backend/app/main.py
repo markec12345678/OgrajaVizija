@@ -254,6 +254,13 @@ def _inquiry_root() -> str:
     return path
 
 
+def _inquiry_dir(inquiry_id: str) -> str:
+    import re
+    if not re.fullmatch(r"inq_[0-9a-f]{32}", inquiry_id):
+        raise HTTPException(400, "Neveljaven ID povpraševanja.")
+    return os.path.join(_inquiry_root(), inquiry_id)
+
+
 async def _save_inquiry_upload(upload: UploadFile | None, path: str, current_total: int) -> int:
     if upload is None or not upload.filename:
         return current_total
@@ -388,7 +395,7 @@ def list_inquiries(authorization: str = Header("")):
 @app.get("/inquiries/{inquiry_id}")
 def get_inquiry(inquiry_id: str, authorization: str = Header("")):
     _require_inquiry_auth(authorization)
-    directory = os.path.join(_inquiry_root(), inquiry_id)
+    directory = _inquiry_dir(inquiry_id)
     payload_path = os.path.join(directory, "payload.json")
     if not os.path.isfile(payload_path):
         raise HTTPException(404, "Povpraševanje ne obstaja.")
@@ -417,7 +424,7 @@ def get_inquiry_file(
     safe_name = os.path.basename(filename).lower()
     if safe_name not in allowed:
         raise HTTPException(400, "Nepodprta priponka.")
-    path = os.path.join(_inquiry_root(), inquiry_id, safe_name)
+    path = os.path.join(_inquiry_dir(inquiry_id), safe_name)
     if not os.path.isfile(path):
         raise HTTPException(404, "Priponka ne obstaja.")
     return FileResponse(path)
@@ -430,7 +437,7 @@ async def update_inquiry(
     authorization: str = Header(""),
 ):
     _require_inquiry_auth(authorization)
-    directory = os.path.join(_inquiry_root(), inquiry_id)
+    directory = _inquiry_dir(inquiry_id)
     meta_path = os.path.join(directory, "meta.json")
     if not os.path.isfile(meta_path):
         raise HTTPException(404, "Povpraševanje ne obstaja.")
