@@ -33,6 +33,7 @@ import si.ograjavizija.app.data.ProjectStore
 import si.ograjavizija.app.data.ProjectStatus
 import si.ograjavizija.app.data.RoksalCategory
 import si.ograjavizija.app.roksal.RoksalCatalog
+import si.ograjavizija.app.network.ApiClient
 import si.ograjavizija.app.ui.components.StepHeader
 import si.ograjavizija.app.ui.theme.Muted
 import si.ograjavizija.app.ui.theme.Warn
@@ -64,6 +65,7 @@ fun RoksalQuoteScreen(
 ) {
     val context = LocalContext.current
     var project by remember { mutableStateOf<Project?>(null) }
+    var inboxStatus by remember { mutableStateOf("") }
 
     LaunchedEffect(projectId) {
         val loaded = projectId?.let { ProjectStore.load(it) } ?: AppState.currentProject
@@ -205,6 +207,15 @@ fun RoksalQuoteScreen(
                 color = Warn,
                 style = MaterialTheme.typography.labelSmall
             )
+            Text(
+                if (AppState.serverUrl.isNotBlank() && AppState.inquiryToken.isNotBlank())
+                    "Lasten inbox je konfiguriran; podatki in fotografije bodo shranjeni na tvojem backendu."
+                else
+                    "Za lastni inbox nastavi URL strežnika in token v Nastavitvah."
+                ,
+                color = Muted,
+                style = MaterialTheme.typography.labelSmall
+            )
             Spacer(Modifier.height(10.dp))
             OutlinedButton(
                 enabled = inquiry.isNotBlank(),
@@ -215,6 +226,46 @@ fun RoksalQuoteScreen(
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Text("📋 Kopiraj povpraševanje")
+            }
+            OutlinedButton(
+                enabled = readyForInquiry && AppState.serverUrl.isNotBlank() && AppState.inquiryToken.isNotBlank() && inboxStatus.isEmpty(),
+                onClick = {
+                    val current = p ?: return@OutlinedButton
+                    val files = listOf("original.jpg", "result.jpg", "product.jpg")
+                        .map { ProjectStore.file(current, it) }
+                        .filter { it.exists() && it.length() > 0L }
+                    inboxStatus = "⏳ Pošiljam v lasten Roksal inbox…"
+                    kotlinx.coroutines.CoroutineScope(kotlinx.coroutines.Dispatchers.Main).launch {
+                        runCatching {
+                            ApiClient.submitInquiry(
+                                baseUrl = AppState.serverUrl,
+                                token = AppState.inquiryToken,
+                                project = current,
+                                inquiryText = inquiry,
+                                attachments = files,
+                            )
+                        }.onSuccess { response ->
+                            val saved = ProjectStore.save(current.copy(status = ProjectStatus.QUOTE_REQUESTED))
+                            project = saved
+                            AppState.setProject(saved)
+                            inboxStatus = "✅ Shranjeno v lasten Roksal inbox · " + response.inquiryId
+                        }.onFailure { e ->
+                            inboxStatus = "⚠️ Inbox: " + (e.message ?: "pošiljanje ni uspelo")
+                        }
+                    }
+                },
+                modifier = Modifier.fillMaxWidth()
+            ) { Text("📥 Shrani v lasten Roksal inbox") }
+            if (inboxStatus.isNotEmpty()) {
+                Text(
+                    inboxStatus,
+                    color = when {
+                        inboxStatus.startsWith("✅") -> Muted
+                        inboxStatus.startsWith("⏳") -> Muted
+                        else -> Warn
+                    },
+                    style = MaterialTheme.typography.labelSmall
+                )
             }
             Spacer(Modifier.height(8.dp))
             Button(
