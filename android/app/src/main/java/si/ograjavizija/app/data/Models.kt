@@ -218,6 +218,10 @@ data class RoksalConfig(
     val address: String = "",
     val deliveryAddressDifferent: Boolean = false,
     val deliveryAddress: String = "",
+    val dataProcessingConsent: Boolean = false,
+    val termsAccepted: Boolean = false,
+    val newsletterOptIn: Boolean = false,
+    val consentAtMillis: Long = 0L,
     val notes: String = "",
 )
 
