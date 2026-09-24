@@ -83,6 +83,7 @@ fun PlaceScreen(projectId: String?, onNext: () -> Unit, onBack: () -> Unit) {
             }
             preview = bmp
         }
+    }
 
     LaunchedEffect(projectId) {
         val p = projectId?.let { ProjectStore.load(it) } ?: AppState.currentProject ?: return@LaunchedEffect
