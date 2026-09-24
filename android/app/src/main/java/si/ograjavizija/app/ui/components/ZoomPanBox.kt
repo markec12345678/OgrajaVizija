@@ -83,7 +83,7 @@ fun ZoomPanBox(
                             }
                             currentOnUp?.invoke()
                         },
-                        onDragCancel = { onUp?.invoke() },
+                        onDragCancel = { currentOnUp?.invoke() },
                         onDrag = { change, drag ->
                             if (drag.getDistance() > 4f) moved = true
                             if (moved) {
