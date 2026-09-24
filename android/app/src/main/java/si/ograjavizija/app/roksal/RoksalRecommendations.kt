@@ -36,8 +36,30 @@ object RoksalRecommendations {
             "NAPUSC" -> listOf(
                 RoksalRecommendation(
                     "Enoten napušč", "P100", 5, RoksalPrivacy.SREDNJA,
-                    "Polna deska 100 je aktualni profil za napušč/strop.",
+                    "Polna deska 100 je med aktualnimi profili za napušč.",
                     "Izbiro smeri in podkonstrukcije uskladi z izvedbo."
+                ),
+                RoksalRecommendation(
+                    "Diskreten napušč", "ROMB67", 10, RoksalPrivacy.ODPRTA,
+                    "ROMB 67 je dodatna možnost za napušč.",
+                    "Potrebna je notranja alu cev in ustrezna podkonstrukcija."
+                )
+            )
+            "STROP" -> listOf(
+                RoksalRecommendation(
+                    "Čist strop", "P100", 5, RoksalPrivacy.SREDNJA,
+                    "Polna deska 100 je ena od aktualnih možnosti za strop.",
+                    "Izbiro smeri in podkonstrukcije uskladi z izvedbo."
+                ),
+                RoksalRecommendation(
+                    "Arhitekturni strop", "KUBO8042", 10, RoksalPrivacy.ODPRTA,
+                    "KUBO 80/42 je po uradnem obrazcu na voljo za strop.",
+                    "Notranja alu rešitev in razpon morata biti tehnično potrjena."
+                ),
+                RoksalRecommendation(
+                    "Reliefni strop", "ROMB67", 10, RoksalPrivacy.ODPRTA,
+                    "ROMB 67 je dodatna možnost za strop.",
+                    "Potrebna je notranja alu cev in ustrezna podkonstrukcija."
                 )
             )
             "PREGRADNA_STENA" -> if (config.orientation == RoksalOrientation.POKONCNA) {
