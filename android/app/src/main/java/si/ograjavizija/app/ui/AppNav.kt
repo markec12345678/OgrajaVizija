@@ -10,6 +10,7 @@ import si.ograjavizija.app.ui.screens.MaskScreen
 import si.ograjavizija.app.ui.screens.PlaceScreen
 import si.ograjavizija.app.ui.screens.RoksalConfigScreen
 import si.ograjavizija.app.ui.screens.RoksalQuoteScreen
+import si.ograjavizija.app.ui.screens.RoksalProjectsScreen
 import si.ograjavizija.app.ui.screens.ResultScreen
 import si.ograjavizija.app.ui.screens.SceneScreen
 import si.ograjavizija.app.ui.screens.SettingsScreen
@@ -24,7 +25,7 @@ import si.ograjavizija.app.ui.screens.SettingsScreen
  *  5 ✨ Ustvari vizualizacijo -> ResultScreen
  *  6 💾 Shrani                -> v ResultScreen
  */
-enum class Route { HOME, SCENE, PRODUCT, MASK, PLACE, RESULT, QUOTE, DIRECT_QUOTE, SETTINGS }
+enum class Route { HOME, PROJECTS, SCENE, PRODUCT, MASK, PLACE, RESULT, QUOTE, DIRECT_QUOTE, SETTINGS }
 
 val STEP_LABELS = listOf(
     "1 📷 Prostor", "2 🧰 Roksal", "3 ✏️ Označi", "4 📐 Položaj", "5 ✨ Rezultat", "6 📩 Povpraš",
@@ -40,7 +41,9 @@ fun AppNav() {
             onNew = { id -> openProjectId = id; route = Route.SCENE },
             onOpen = { id -> openProjectId = id; route = Route.SCENE },
             onSettings = { route = Route.SETTINGS },
+            onProjects = { route = Route.PROJECTS },
         )
+        Route.PROJECTS -> RoksalProjectsScreen(onBack = { route = Route.HOME })
         Route.SCENE -> SceneScreen(projectId = openProjectId, onNext = { route = Route.PRODUCT }, onBack = { route = Route.HOME })
         Route.PRODUCT -> RoksalConfigScreen(
             projectId = openProjectId,
