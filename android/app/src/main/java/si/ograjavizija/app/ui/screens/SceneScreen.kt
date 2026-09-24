@@ -46,6 +46,7 @@ fun SceneScreen(projectId: String?, onNext: () -> Unit, onBack: () -> Unit) {
     var bmp by remember { mutableStateOf<android.graphics.Bitmap?>(null) }
     var pendingUri by remember { mutableStateOf<String?>(null) }
     var hasCamPerm by remember { mutableStateOf(false) }
+    val sceneImage = remember(bmp) { bmp?.copy(android.graphics.Bitmap.Config.ARGB_8888, false)?.asImageBitmap() }
 
     suspend fun import(c: android.content.Context, uri: String, done: (Project?, android.graphics.Bitmap?) -> Unit) {
         var p = project ?: projectId?.let { ProjectStore.load(it) } ?: ProjectController.createProject("")
@@ -81,7 +82,7 @@ fun SceneScreen(projectId: String?, onNext: () -> Unit, onBack: () -> Unit) {
     Column(Modifier.fillMaxSize()) {
         StepHeader(1, "1 · Fotografiraj balkon", onBack)
         if (bmp != null) {
-            ZoomPanBox(image = bmp!!.copy(android.graphics.Bitmap.Config.ARGB_8888, false).asImageBitmap(),
+            ZoomPanBox(image = sceneImage!!,
                 modifier = Modifier.weight(1f))
             Row(Modifier.fillMaxWidth().padding(12.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 OutlinedButton(onClick = { pickPic.launch("image/*") }, modifier = Modifier.weight(1f)) {
