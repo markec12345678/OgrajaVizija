@@ -24,6 +24,7 @@ import androidx.compose.ui.unit.dp
 import si.ograjavizija.app.data.AppState
 import si.ograjavizija.app.data.Project
 import si.ograjavizija.app.data.ProjectStore
+import si.ograjavizija.app.data.ProjectStatus
 import si.ograjavizija.app.roksal.RoksalCatalog
 import si.ograjavizija.app.ui.components.StepHeader
 import si.ograjavizija.app.ui.theme.Muted
@@ -116,6 +117,10 @@ fun RoksalQuoteScreen(
             Spacer(Modifier.height(10.dp))
             Button(
                 onClick = {
+                    val current = p
+                    if (current != null) {
+                        project = ProjectStore.save(current.copy(status = ProjectStatus.QUOTE_REQUESTED))
+                    }
                     val intent = Intent(Intent.ACTION_SEND).apply {
                         type = "text/plain"
                         putExtra(Intent.EXTRA_SUBJECT, "Roksal povpraševanje · " + (p?.name ?: "projekt"))
