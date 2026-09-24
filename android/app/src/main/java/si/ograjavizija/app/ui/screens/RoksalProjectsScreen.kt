@@ -90,6 +90,7 @@ fun RoksalProjectsScreen(onBack: () -> Unit) {
 
 @Composable
 private fun ProjectAdminRow(project: Project, onChanged: () -> Unit) {
+    val scope = androidx.compose.runtime.rememberCoroutineScope()
     var expanded by remember(project.id) { mutableStateOf(false) }
     Surface(
         modifier = Modifier.fillMaxWidth(),
