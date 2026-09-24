@@ -36,6 +36,8 @@ import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.launch
 import si.ograjavizija.app.data.AppState
 import si.ograjavizija.app.data.MeasurementStatus
+import si.ograjavizija.app.data.MeasurementMethod
+import si.ograjavizija.app.data.DeliveryPreference
 import si.ograjavizija.app.data.Project
 import si.ograjavizija.app.data.ProjectController
 import si.ograjavizija.app.data.ProjectStore
@@ -72,6 +74,11 @@ fun RoksalConfigScreen(
     var supportSpacing by remember { mutableFloatStateOf(100f) }
     var existing by remember { mutableStateOf(RoksalStructure.NEVEM) }
     var measureStatus by remember { mutableStateOf(MeasurementStatus.OCENA) }
+    var measurementMethod by remember { mutableStateOf(MeasurementMethod.ZNANE_MERE) }
+    var referenceDimension by remember { mutableFloatStateOf(0f) }
+    var referenceLabel by remember { mutableStateOf("") }
+    var segmentLengths by remember { mutableStateOf("") }
+    var delivery by remember { mutableStateOf(DeliveryPreference.NEVEM) }
     var gateType by remember { mutableStateOf("BREZ") }
     var gateWidth by remember { mutableFloatStateOf(1.0f) }
     var gateHeight by remember { mutableFloatStateOf(1.2f) }
@@ -101,6 +108,11 @@ fun RoksalConfigScreen(
             supportSpacing = old.supportSpacingCm
             existing = old.existingStructure
             measureStatus = old.measurementStatus
+            measurementMethod = old.measurementMethod
+            referenceDimension = old.referenceDimensionMm
+            referenceLabel = old.referenceLabel
+            segmentLengths = old.segmentLengthsText
+            delivery = old.deliveryPreference
             gateType = old.gateType
             gateWidth = old.gateWidthM
             gateHeight = old.gateHeightM
@@ -141,6 +153,11 @@ fun RoksalConfigScreen(
             gateHeightM = if (gateType == "BREZ") 0f else gateHeight,
             existingStructure = existing,
             measurementStatus = measureStatus,
+            measurementMethod = measurementMethod,
+            referenceDimensionMm = referenceDimension,
+            referenceLabel = referenceLabel,
+            segmentLengthsText = segmentLengths,
+            deliveryPreference = delivery,
             customerName = customerName,
             phone = phone,
             email = email,
@@ -249,7 +266,7 @@ fun RoksalConfigScreen(
                     )
                 }
                 Text("Razmak med deskami: " + gapMm.toInt() + " mm")
-                Slider(value = gapMm, onValueChange = { gapMm = it }, valueRange = 0f..30f)
+                Slider(value = gapMm, onValueChange = { gapMm = it }, valueRange = 2f..30f)
 
                 Text("Vrata", style = MaterialTheme.typography.titleSmall)
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.horizontalScroll(rememberScrollState())) {
@@ -349,6 +366,30 @@ fun RoksalConfigScreen(
                     onClick = { measureStatus = MeasurementStatus.POTRJENO },
                     label = { Text("Mere potrjene") }
                 )
+            }
+
+            Spacer(Modifier.height(8.dp))
+            Text("Kako si določil mere?", style = MaterialTheme.typography.titleSmall)
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.horizontalScroll(rememberScrollState())) {
+                FilterChip(selected = measurementMethod == MeasurementMethod.ZNANE_MERE, onClick = { measurementMethod = MeasurementMethod.ZNANE_MERE }, label = { Text("Znane mere") })
+                FilterChip(selected = measurementMethod == MeasurementMethod.REFERENCA_NA_SLIKI, onClick = { measurementMethod = MeasurementMethod.REFERENCA_NA_SLIKI }, label = { Text("Referenca na sliki") })
+                FilterChip(selected = measurementMethod == MeasurementMethod.SEGMENTI, onClick = { measurementMethod = MeasurementMethod.SEGMENTI }, label = { Text("Segmenti") })
+            }
+            if (measurementMethod == MeasurementMethod.REFERENCA_NA_SLIKI) {
+                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    OutlinedTextField(referenceDimension.toString(), { it.toFloatOrNull()?.let { referenceDimension = it } }, label = { Text("Znana mera mm") }, modifier = Modifier.weight(1f), singleLine = true)
+                    OutlinedTextField(referenceLabel, { referenceLabel = it }, label = { Text("Kaj meriš?") }, modifier = Modifier.weight(1f), singleLine = true)
+                }
+            }
+            if (measurementMethod == MeasurementMethod.SEGMENTI) {
+                OutlinedTextField(segmentLengths, { segmentLengths = it }, label = { Text("Segmenti, npr. 2,4; 2,8; 3,1 m") }, modifier = Modifier.fillMaxWidth(), singleLine = true)
+            }
+            Spacer(Modifier.height(8.dp))
+            Text("Dostava", style = MaterialTheme.typography.titleSmall)
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.horizontalScroll(rememberScrollState())) {
+                FilterChip(selected = delivery == DeliveryPreference.DOSTAVA, onClick = { delivery = DeliveryPreference.DOSTAVA }, label = { Text("Dostava") })
+                FilterChip(selected = delivery == DeliveryPreference.OSEBNI_PREVZEM, onClick = { delivery = DeliveryPreference.OSEBNI_PREVZEM }, label = { Text("Osebni prevzem") })
+                FilterChip(selected = delivery == DeliveryPreference.NEVEM, onClick = { delivery = DeliveryPreference.NEVEM }, label = { Text("Ne vem") })
             }
 
             Spacer(Modifier.height(10.dp))
