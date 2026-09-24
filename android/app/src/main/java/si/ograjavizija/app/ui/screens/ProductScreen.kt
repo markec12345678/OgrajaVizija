@@ -77,7 +77,17 @@ fun ProductScreen(projectId: String?, onNext: () -> Unit, onBack: () -> Unit) {
         refreshCutout()
     }
 
-    val camPerm = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { }
+    val camPerm = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { ok ->
+        if (ok) {
+            val f = java.io.File(ctx.cacheDir, "camera").apply { mkdirs() }
+            val tmp = java.io.File(f, "product_${System.currentTimeMillis()}.jpg")
+            pendingUri = androidx.core.content.FileProvider.getUriForFile(
+                ctx, ctx.packageName + ".fileprovider", tmp).toString()
+            takePic.launch(Uri.parse(pendingUri))
+        } else {
+            status = "⚠️ Dovoljenje za kamero je zavrnjeno."
+        }
+    }
     val takePic = rememberLauncherForActivityResult(ActivityResultContracts.TakePicture()) { ok ->
         if (ok) pendingUri?.let { u -> scope.launch { loadProduct(u) } }
     }
@@ -120,10 +130,6 @@ fun ProductScreen(projectId: String?, onNext: () -> Unit, onBack: () -> Unit) {
                 Spacer(Modifier.height(14.dp))
                 Button(onClick = {
                     camPerm.launch(Manifest.permission.CAMERA)
-                    val f = java.io.File(ctx.cacheDir, "camera").apply { mkdirs() }
-                    val tmp = java.io.File(f, "product_${System.currentTimeMillis()}.jpg")
-                    pendingUri = androidx.core.content.FileProvider.getUriForFile(ctx, ctx.packageName + ".fileprovider", tmp).toString()
-                    takePic.launch(Uri.parse(pendingUri))
                 }, modifier = Modifier.fillMaxWidth().height(56.dp)) { Text("📷 Fotografiraj ograjo") }
                 Spacer(Modifier.height(8.dp))
                 OutlinedButton(onClick = { pickPic.launch("image/*") }, modifier = Modifier.fillMaxWidth()) {
