@@ -209,6 +209,7 @@ enum class ProjectStatus {
     DRAFT,
     CONFIGURED,
     VISUALIZED,
+    QUOTE_PREPARED,
     QUOTE_REQUESTED,
     ROKSAL_REVIEW,
     SITE_MEASUREMENT,

@@ -47,7 +47,6 @@ private fun roksalEnquiryUrl(category: RoksalCategory): String = when (category)
     RoksalCategory.NAPUSC -> "https://roksal.com/wpc-povprasevanje/"
 }
 
-@Composable
 private fun candidateAttachmentNote(project: Project): String? {
     val files = listOf("original.jpg", "result.jpg", "product.jpg")
         .map { ProjectStore.file(project, it) }
@@ -68,7 +67,12 @@ fun RoksalQuoteScreen(
     var project by remember { mutableStateOf<Project?>(null) }
 
     LaunchedEffect(projectId) {
-        project = projectId?.let { ProjectStore.load(it) } ?: AppState.currentProject
+        val loaded = projectId?.let { ProjectStore.load(it) } ?: AppState.currentProject
+        if (loaded != null && loaded.status != ProjectStatus.QUOTE_REQUESTED) {
+            project = ProjectStore.save(loaded.copy(status = ProjectStatus.QUOTE_PREPARED))
+        } else {
+            project = loaded
+        }
     }
 
     val p = project
@@ -217,14 +221,8 @@ fun RoksalQuoteScreen(
             Button(
                 enabled = readyForInquiry,
                 onClick = {
-                    val current = p
-                    if (current != null) {
-                        scope.launch {
-                            project = ProjectStore.save(current.copy(status = ProjectStatus.QUOTE_REQUESTED))
-                        }
-                    }
                     val candidateFiles = p?.let { project ->
-                        listOf("original.jpg", "result.jpg")
+                        listOf("original.jpg", "result.jpg", "product.jpg")
                             .map { ProjectStore.file(project, it) }
                             .filter { it.exists() }
                     }.orEmpty()
