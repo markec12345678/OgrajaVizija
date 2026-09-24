@@ -67,7 +67,13 @@ fun RoksalQuoteScreen(
             it.phone.isNotBlank() &&
             it.email.isNotBlank() &&
             it.invoiceAddress.isNotBlank() &&
+            it.invoicePostalCode.isNotBlank() &&
+            it.invoiceCity.isNotBlank() &&
             it.address.isNotBlank() &&
+            it.projectPostalCode.isNotBlank() &&
+            it.projectCity.isNotBlank() &&
+            (it.customerType != si.ograjavizija.app.data.CustomerType.PODJETJE ||
+                (it.companyName.isNotBlank() && it.taxNumber.isNotBlank())) &&
             it.dataProcessingConsent &&
             it.termsAccepted
     } == true
@@ -126,10 +132,13 @@ fun RoksalQuoteScreen(
             appendLine("Davčna številka: " + (c?.taxNumber ?: ""))
             appendLine("Telefon: " + (c?.phone ?: ""))
             appendLine("E-pošta: " + (c?.email ?: ""))
-            appendLine("Naslov za račun: " + (c?.invoiceAddress ?: ""))
-            appendLine("Lokacija projekta: " + (c?.address ?: ""))
+            appendLine("Naslov za račun: " + (c?.invoiceAddress ?: "") + ", " + (c?.invoicePostalCode ?: "") + " " + (c?.invoiceCity ?: ""))
+            appendLine("Lokacija projekta: " + (c?.address ?: "") + ", " + (c?.projectPostalCode ?: "") + " " + (c?.projectCity ?: ""))
             appendLine("Dostava na drug naslov: " + if (c?.deliveryAddressDifferent == true) "DA" else "NE")
-            if (c?.deliveryAddressDifferent == true) appendLine("Naslov dostave: " + c?.deliveryAddress)
+            if (c?.deliveryAddressDifferent == true) appendLine("Naslov dostave: " + c?.deliveryAddress + ", " + c?.deliveryPostalCode + " " + c?.deliveryCity)
+            appendLine("Soglasje za obdelavo: " + if (c?.dataProcessingConsent == true) "DA" else "NE")
+            appendLine("Sprejeti pogoji: " + if (c?.termsAccepted == true) "DA" else "NE")
+            appendLine("E-novice: " + if (c?.newsletterOptIn == true) "DA" else "NE")
             appendLine()
             if (estimate != null) {
                 appendLine("INFORMATIVNI MATERIALNI IZRAČUN")
