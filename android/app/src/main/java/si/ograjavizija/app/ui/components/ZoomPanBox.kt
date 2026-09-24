@@ -8,6 +8,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
@@ -43,11 +44,20 @@ fun ZoomPanBox(
     var size by remember { mutableStateOf(IntSize.Zero) }
     var scale by remember(image) { mutableStateOf(1f) }
     var offset by remember(image) { mutableStateOf(Offset.Zero) }
-    var fitted by remember(image) { mutableStateOf(false) }
+    var fitted by remember(image, size) { mutableStateOf(false) }
+
+    // pointerInput lives longer than a recomposition. Keep the gesture handler
+    // connected to the latest transform and callbacks instead of stale values.
+    val currentScale by rememberUpdatedState(scale)
+    val currentOffset by rememberUpdatedState(offset)
+    val currentOnTap by rememberUpdatedState(onTap)
+    val currentOnDown by rememberUpdatedState(onDown)
+    val currentOnMove by rememberUpdatedState(onMove)
+    val currentOnUp by rememberUpdatedState(onUp)
 
     fun toImg(p: Offset): Offset = Offset(
-        ((p.x - offset.x) / scale).coerceIn(0f, image.width.toFloat() - 0.001f),
-        ((p.y - offset.y) / scale).coerceIn(0f, image.height.toFloat() - 0.001f),
+        ((p.x - currentOffset.x) / currentScale).coerceIn(0f, image.width.toFloat() - 0.001f),
+        ((p.y - currentOffset.y) / currentScale).coerceIn(0f, image.height.toFloat() - 0.001f),
     )
 
     Box(
@@ -63,22 +73,22 @@ fun ZoomPanBox(
                             start = p
                             moved = false
                             val i = toImg(p)
-                            onDown?.invoke(i.x, i.y)
+                            currentOnDown?.invoke(i.x, i.y)
                         },
                         onDragEnd = {
                             // ce se prst ni premaknil, gre za tap (npr. segmentacija/flood fill)
                             if (!moved) {
                                 val i = toImg(start)
-                                onTap?.invoke(i.x, i.y)
+                                currentOnTap?.invoke(i.x, i.y)
                             }
-                            onUp?.invoke()
+                            currentOnUp?.invoke()
                         },
                         onDragCancel = { onUp?.invoke() },
                         onDrag = { change, drag ->
                             if (drag.getDistance() > 4f) moved = true
                             if (moved) {
                                 val i = toImg(change.position)
-                                onMove?.invoke(i.x, i.y)
+                                currentOnMove?.invoke(i.x, i.y)
                             }
                             change.consume()
                         },
