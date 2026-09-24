@@ -361,7 +361,7 @@ object RoksalCatalog {
                     val heightMm = max(1, (c.heightM * 1000f).roundToInt())
                     val boardsPerStock = max(1, stock / heightMm)
                     val stockPieces = ceil(verticalBoards.toFloat() / boardsPerStock).toInt()
-                    val maxSupport = maxSupportCmFor(c, p) ?: c.supportSpacingCm
+                    val maxSupport = maxSupportCmFor(c, p)?.toFloat() ?: c.supportSpacingCm
                     val supports = max(2, ceil(c.lengthM * 100f / maxSupport).toInt() + 1)
                     MaterialEstimate(
                         boards = stockPieces,
@@ -400,6 +400,36 @@ object RoksalCatalog {
                 }
             }
         }
+    }
+
+    fun componentsFor(c: RoksalConfig): List<RoksalComponent> {
+        val out = mutableListOf<RoksalComponent>()
+        if (c.category == RoksalCategory.OGRAJA && c.handleIncluded) {
+            out += components.first { it.id == "HANDLE_92" }
+        }
+        out += components.first { it.id == "RF_SCREW" }
+
+        if (c.profileId == "ROMB67") {
+            out += components.first { it.id == "ROMB_ALU" }
+            out += components.first { it.id == "ROMB_CAP_LR" }
+            if (c.orientation == RoksalOrientation.PRECNA) {
+                out += components.first { it.id == "L_BRACKET" }
+            }
+        }
+
+        when (c.category) {
+            RoksalCategory.TERASA -> {
+                out += components.first { it.id == "TERRACE_SUB" }
+                out += components.first { it.id == "TERRACE_ALU" }
+                out += components.first { it.id == "TERRACE_TRIM" }
+                out += components.first { it.id == "TERRACE_CLIP" }
+            }
+            RoksalCategory.FASADA -> {
+                out += components.first { it.id == "FACADE_CLIP" }
+            }
+            else -> Unit
+        }
+        return out.distinctBy { it.id }
     }
 
     fun renderTechnicalPreview(config: RoksalConfig, width: Int = 1200, height: Int = 700): Bitmap {
