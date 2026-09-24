@@ -47,8 +47,8 @@ fun AppNav() {
         Route.SCENE -> SceneScreen(projectId = openProjectId, onNext = { route = Route.PRODUCT }, onBack = { route = Route.HOME })
         Route.PRODUCT -> RoksalConfigScreen(
             projectId = openProjectId,
-            onContinue = { category ->
-                route = if (category == si.ograjavizija.app.data.RoksalCategory.OGRAJA) Route.MASK else Route.DIRECT_QUOTE
+            onContinue = {
+                route = Route.MASK
             },
             onBack = { route = Route.SCENE },
         )
