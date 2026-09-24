@@ -10,6 +10,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
+import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -32,7 +33,9 @@ import si.ograjavizija.app.ui.theme.Muted
 fun SettingsScreen(onBack: () -> Unit) {
     val scope = rememberCoroutineScope()
     var url by remember { mutableStateOf(AppState.serverUrl) }
+    var inquiryToken by remember { mutableStateOf(AppState.inquiryToken) }
     var health by remember { mutableStateOf("") }
+    var inquiryStatus by remember { mutableStateOf("") }
 
     Column(Modifier.fillMaxSize().padding(16.dp)) {
         StepHeader(0, "Nastavitve", onBack)
@@ -48,9 +51,21 @@ fun SettingsScreen(onBack: () -> Unit) {
             label = { Text("Naslov strežnika, npr. http://192.168.1.20:8787") },
             modifier = Modifier.fillMaxWidth(), singleLine = true,
         )
+
+        Spacer(Modifier.height(8.dp))
+        OutlinedTextField(
+            value = inquiryToken,
+            onValueChange = { inquiryToken = it },
+            label = { Text("Token za lasten Roksal inbox (opcijsko)") },
+            placeholder = { Text("Nastavljen z OVIZ_INQUIRY_TOKEN na backendu") },
+            visualTransformation = PasswordVisualTransformation(),
+            modifier = Modifier.fillMaxWidth(),
+            singleLine = true,
+        )
         Spacer(Modifier.height(8.dp))
         OutlinedButton(onClick = {
             AppState.updateServerUrl(url)
+            AppState.updateInquiryToken(inquiryToken)
             scope.launch {
                 health = runCatching {
                     val h = ApiClient.health(AppState.serverUrl)
@@ -60,6 +75,26 @@ fun SettingsScreen(onBack: () -> Unit) {
         }, modifier = Modifier.fillMaxWidth()) { Text("Preveri povezavo") }
         if (health.isNotEmpty()) Text(health, color = if (health.startsWith("✅")) Accent else Bad,
             style = MaterialTheme.typography.labelSmall)
+        Spacer(Modifier.height(12.dp))
+        OutlinedButton(
+            enabled = AppState.serverUrl.isNotBlank() && AppState.inquiryToken.isNotBlank(),
+            onClick = {
+                scope.launch {
+                    inquiryStatus = runCatching {
+                        val info = ApiClient.inquiryHealth(AppState.serverUrl, AppState.inquiryToken)
+                        "✅ Roksal inbox: " + info.total + " prejetih · zadnji status " + info.lastStatus.ifBlank { "—" }
+                    }.getOrElse { e -> "⚠️ " + e.message }
+                }
+            },
+            modifier = Modifier.fillMaxWidth()
+        ) { Text("Preveri Roksal inbox") }
+        if (inquiryStatus.isNotEmpty()) {
+            Text(
+                inquiryStatus,
+                color = if (inquiryStatus.startsWith("✅")) Accent else Bad,
+                style = MaterialTheme.typography.labelSmall
+            )
+        }
         Spacer(Modifier.height(16.dp))
         Text("Modeli na napravi", style = MaterialTheme.typography.titleSmall, color = Muted)
         Text(
