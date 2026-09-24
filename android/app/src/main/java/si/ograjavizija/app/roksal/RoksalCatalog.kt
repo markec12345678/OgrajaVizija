@@ -334,8 +334,16 @@ object RoksalCatalog {
                     warnings += "Pri neravni podlagi Roksal priporoča aluminijasto podkonstrukcijo namesto točkovno podprte WPC letve."
             }
             RoksalCategory.NAPUSC -> {
-                if (p.id != "P100") warnings += "Za napušč je v trenutnem konfiguratorju podprt P100."
-                if (c.supportSpacingCm > 80f) warnings += "Razmak podkonstrukcije je treba preveriti glede na izbrano izvedbo; privzeto ga omejujemo na 80 cm."
+                if (p.id !in setOf("P100", "ROMB67"))
+                    warnings += "Za napušč sta v trenutnem konfiguratorju podprta P100 in ROMB."
+                if (c.supportSpacingCm > 80f)
+                    warnings += "Razmak podkonstrukcije je treba preveriti glede na izbrano izvedbo; privzeto ga omejujemo na 80 cm."
+            }
+            RoksalCategory.STROP -> {
+                if (p.id !in setOf("P100", "ROMB67", "KUBO8042"))
+                    warnings += "Za strop so v trenutnem konfiguratorju podprti P100, ROMB in KUBO."
+                if (c.supportSpacingCm > 80f)
+                    warnings += "Razmak podkonstrukcije je treba preveriti glede na izbrano izvedbo; privzeto ga omejujemo na 80 cm."
             }
         }
         return ValidationResult(warnings.none { it.startsWith("Napaka:") }, warnings)
