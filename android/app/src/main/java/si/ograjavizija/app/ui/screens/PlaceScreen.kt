@@ -28,6 +28,7 @@ import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import si.ograjavizija.app.data.AppState
@@ -56,13 +57,15 @@ fun PlaceScreen(projectId: String?, onNext: () -> Unit, onBack: () -> Unit) {
     var preview by remember { mutableStateOf<android.graphics.Bitmap?>(null) }
     var dragIdx by remember { mutableIntStateOf(-1) }
     var busy by remember { mutableStateOf(false) }
+    var previewJob by remember { mutableStateOf<Job?>(null) }
 
     fun recompute() {
         val s = scene ?: return
         val c = cutout ?: return
         val pl = placement ?: return
         if (!pl.isValid) return
-        scope.launch {
+        previewJob?.cancel()
+        previewJob = scope.launch {
             val bmp = withContext(Dispatchers.Default) {
                 val sw = s.width; val sh = s.height
                 val px = IntArray(sw * sh); s.getPixels(px, 0, sw, 0, 0, sw, sh)
@@ -80,7 +83,6 @@ fun PlaceScreen(projectId: String?, onNext: () -> Unit, onBack: () -> Unit) {
             }
             preview = bmp
         }
-    }
 
     LaunchedEffect(projectId) {
         val p = projectId?.let { ProjectStore.load(it) } ?: AppState.currentProject ?: return@LaunchedEffect
