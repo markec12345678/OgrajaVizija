@@ -124,6 +124,7 @@ fun RoksalConfigScreen(
     var dataConsent by remember { mutableStateOf(false) }
     var termsAccepted by remember { mutableStateOf(false) }
     var newsletterOptIn by remember { mutableStateOf(false) }
+    var consentAtMillis by remember { mutableStateOf(0L) }
     var status by remember { mutableStateOf("") }
     var showRecommendations by remember { mutableStateOf(false) }
     var terraceWidth by remember { mutableFloatStateOf(0f) }
@@ -196,6 +197,7 @@ fun RoksalConfigScreen(
             dataConsent = old.dataProcessingConsent
             termsAccepted = old.termsAccepted
             newsletterOptIn = old.newsletterOptIn
+            consentAtMillis = old.consentAtMillis
         }
     }
 
@@ -282,9 +284,7 @@ fun RoksalConfigScreen(
             dataProcessingConsent = dataConsent,
             termsAccepted = termsAccepted,
             newsletterOptIn = newsletterOptIn,
-            consentAtMillis = if (dataConsent && termsAccepted) {
-                p0ConsentTimestamp(project?.config?.consentAtMillis)
-            } else 0L,
+            consentAtMillis = consentAtMillis,
             notes = notes,
         )
     }
@@ -757,11 +757,17 @@ fun RoksalConfigScreen(
             Spacer(Modifier.height(8.dp))
             Text("Pred oddajo povpraševanja", style = MaterialTheme.typography.titleSmall)
             Row(verticalAlignment = androidx.compose.ui.Alignment.CenterVertically) {
-                Checkbox(checked = dataConsent, onCheckedChange = { dataConsent = it })
+                Checkbox(checked = dataConsent, onCheckedChange = {
+                    dataConsent = it
+                    if (it && termsAccepted && consentAtMillis == 0L) consentAtMillis = System.currentTimeMillis()
+                })
                 Text("Strinjam se z obdelavo osebnih podatkov za odgovor na povpraševanje.", style = MaterialTheme.typography.bodySmall)
             }
             Row(verticalAlignment = androidx.compose.ui.Alignment.CenterVertically) {
-                Checkbox(checked = termsAccepted, onCheckedChange = { termsAccepted = it })
+                Checkbox(checked = termsAccepted, onCheckedChange = {
+                    termsAccepted = it
+                    if (it && dataConsent && consentAtMillis == 0L) consentAtMillis = System.currentTimeMillis()
+                })
                 Text("Seznanjen/-a sem s splošnimi pogoji Roksala.", style = MaterialTheme.typography.bodySmall)
             }
             Row(verticalAlignment = androidx.compose.ui.Alignment.CenterVertically) {
@@ -821,8 +827,6 @@ fun RoksalConfigScreen(
         }
     }
 }
-
-private fun p0ConsentTimestamp(existing: Long): Long = existing.takeIf { it > 0L } ?: System.currentTimeMillis()
 
 @Composable
 private fun ProfileCard(profile: RoksalProfile, selected: Boolean, onClick: () -> Unit) {
