@@ -66,6 +66,8 @@ fun RoksalConfigScreen(
     var orientation by remember { mutableStateOf(RoksalOrientation.POKONCNA) }
     var profile by remember { mutableStateOf<RoksalProfile?>(null) }
     var colourId by remember { mutableStateOf("BURMA_TEAK") }
+    var surfaceId by remember { mutableStateOf("") }
+    var handleIncluded by remember { mutableStateOf(true) }
     var gapMm by remember { mutableFloatStateOf(10f) }
     var privacy by remember { mutableStateOf(RoksalPrivacy.SREDNJA) }
     var length by remember { mutableFloatStateOf(10f) }
@@ -100,6 +102,7 @@ fun RoksalConfigScreen(
             category = old.category
             orientation = old.orientation
             colourId = old.colourId
+            surfaceId = old.surfaceId
             gapMm = old.boardGapMm.toFloat()
             privacy = old.privacy
             length = old.lengthM
@@ -151,6 +154,7 @@ fun RoksalConfigScreen(
             gateType = if (category == RoksalCategory.OGRAJA) gateType else "BREZ",
             gateWidthM = if (gateType == "BREZ") 0f else gateWidth,
             gateHeightM = if (gateType == "BREZ") 0f else gateHeight,
+            handleIncluded = handleIncluded,
             existingStructure = existing,
             measurementStatus = measureStatus,
             measurementMethod = measurementMethod,
@@ -208,6 +212,19 @@ fun RoksalConfigScreen(
                 }
             }
             current?.let {
+                if (it.surfaceOptions.isNotEmpty()) {
+                    Spacer(Modifier.height(8.dp))
+                    Text("Površina", style = MaterialTheme.typography.titleSmall)
+                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.horizontalScroll(rememberScrollState())) {
+                        it.surfaceOptions.forEach { surface ->
+                            FilterChip(
+                                selected = surfaceId == surface,
+                                onClick = { surfaceId = surface },
+                                label = { Text(surface) }
+                            )
+                        }
+                    }
+                }
                 Spacer(Modifier.height(6.dp))
                 Text(it.dimensions, color = Muted, style = MaterialTheme.typography.labelSmall)
                 Text(it.notes, color = Muted, style = MaterialTheme.typography.bodySmall)
@@ -246,6 +263,12 @@ fun RoksalConfigScreen(
             )
 
             if (category == RoksalCategory.OGRAJA) {
+                Spacer(Modifier.height(8.dp))
+                FilterChip(
+                    selected = handleIncluded,
+                    onClick = { handleIncluded = !handleIncluded },
+                    label = { Text(if (handleIncluded) "Vključi zgornji ročaj" else "Brez zgornjega ročaja") }
+                )
                 Spacer(Modifier.height(10.dp))
                 Text("Zasebnost in razmak", style = MaterialTheme.typography.titleMedium)
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.horizontalScroll(rememberScrollState())) {
