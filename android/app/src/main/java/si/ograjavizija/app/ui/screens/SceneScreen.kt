@@ -55,6 +55,9 @@ fun SceneScreen(projectId: String?, onNext: () -> Unit, onBack: () -> Unit) {
         done(p, b)
     }
 
+    val takePic = rememberLauncherForActivityResult(ActivityResultContracts.TakePicture()) { ok ->
+        if (ok) pendingUri?.let { u -> scope.launch { import(ctx, u) { p, b -> project = p; bmp = b } } }
+    }
     val camPerm = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { ok ->
         hasCamPerm = ok
         if (ok) {
@@ -64,9 +67,6 @@ fun SceneScreen(projectId: String?, onNext: () -> Unit, onBack: () -> Unit) {
                 ctx, ctx.packageName + ".fileprovider", tmp).toString()
             takePic.launch(Uri.parse(pendingUri))
         }
-    }
-    val takePic = rememberLauncherForActivityResult(ActivityResultContracts.TakePicture()) { ok ->
-        if (ok) pendingUri?.let { u -> scope.launch { import(ctx, u) { p, b -> project = p; bmp = b } } }
     }
     val pickPic = rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri ->
         uri?.let { u -> scope.launch { import(ctx, u.toString()) { p, b -> project = p; bmp = b } } }
