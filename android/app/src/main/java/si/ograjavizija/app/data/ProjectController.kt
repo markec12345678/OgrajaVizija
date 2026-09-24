@@ -6,6 +6,7 @@ import android.graphics.BitmapFactory
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import si.ograjavizija.app.imaging.BackgroundRemover
+import si.ograjavizija.app.roksal.RoksalCatalog
 import si.ograjavizija.app.imaging.BitmapIo
 import si.ograjavizija.app.imaging.MaskEditor
 import si.ograjavizija.app.imaging.PureCore
@@ -62,6 +63,13 @@ object ProjectController {
         return p2 to how
     }
 
+    suspend fun applyRoksalConfig(p: Project, config: RoksalConfig): Project = withContext(Dispatchers.IO) {
+        val preview = RoksalCatalog.renderTechnicalPreview(config)
+        ProjectStore.writeBitmap(p, "product.jpg", preview, 95)
+        ProjectStore.writeBitmap(p, "cutout.png", preview, 100)
+        val ref = ImageRef("product.jpg", preview.width, preview.height)
+        ProjectStore.save(p.copy(product = ref, config = config))
+    }
     suspend fun loadMask(p: Project): MaskEditor? = withContext(Dispatchers.IO) {
         val scene = ProjectStore.readBitmap(p, "original.jpg", 2000) ?: return@withContext null
         val f = ProjectStore.file(p, "mask.png")
@@ -73,9 +81,11 @@ object ProjectController {
         } else MaskEditor(scene.width, scene.height)
     }
 
-    suspend fun saveMask(p: Project, editor: MaskEditor): Project {
+    suspend fun saveMask(p: Project, editor: MaskEditor, source: MaskSource = MaskSource.MANUAL): Project {
         ProjectStore.writeBytes(p, "mask.png", editor.toPngBytes())
-        return ProjectStore.save(p.copy(maskMeta = MaskMeta(editor.mask[0].let { MaskSource.MANUAL }, editor.maskW, editor.maskH)))
+        return ProjectStore.save(
+            p.copy(maskMeta = MaskMeta(source = source, width = editor.maskW, height = editor.maskH))
+        )
     }
 
     fun defaultPlacement(sceneW: Int, sceneH: Int): Placement {
