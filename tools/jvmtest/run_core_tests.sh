@@ -15,10 +15,10 @@ if [ ! -d "$CACHE" ] || [ -z "$(find "$CACHE" -name 'kotlin-compiler-embeddable-
   curl -sL -o tools_jars/ann.jar https://repo1.maven.org/maven2/org/jetbrains/annotations/23.0.0/annotations-23.0.0.jar
   CACHE=$(pwd)/tools_jars_flat
   mkdir -p "$CACHE/org/jetbrains/kotlin/kotlin-compiler-embeddable/2.0.21/x" "$CACHE/org/jetbrains/kotlin/kotlin-stdlib/2.0.21/x" "$CACHE/org/jetbrains/kotlinx/kotlinx-coroutines-core-jvm/1.9.0/x" "$CACHE/org/jetbrains/annotations/23.0.0/x"
-  cp tools_jars/kc.jar "$CACHE/org/jetbrains/kotlin/kotlin-compiler-embeddable/2.0.21/x/"
-  cp tools_jars/std.jar "$CACHE/org/jetbrains/kotlin/kotlin-stdlib/2.0.21/x/"
-  cp tools_jars/cor.jar "$CACHE/org/jetbrains/kotlinx/kotlinx-coroutines-core-jvm/1.9.0/x/"
-  cp tools_jars/ann.jar "$CACHE/org/jetbrains/annotations/23.0.0/x/"
+  cp tools_jars/kc.jar "$CACHE/org/jetbrains/kotlin/kotlin-compiler-embeddable/2.0.21/x/kotlin-compiler-embeddable-2.0.21.jar"
+  cp tools_jars/std.jar "$CACHE/org/jetbrains/kotlin/kotlin-stdlib/2.0.21/x/kotlin-stdlib-2.0.21.jar"
+  cp tools_jars/cor.jar "$CACHE/org/jetbrains/kotlinx/kotlinx-coroutines-core-jvm/1.9.0/x/kotlinx-coroutines-core-jvm-1.9.0.jar"
+  cp tools_jars/ann.jar "$CACHE/org/jetbrains/annotations/23.0.0/x/annotations-23.0.0.jar"
 fi
 find_jar() { find "$CACHE" -name "$1" 2>/dev/null | head -1; }
 KC=$(find_jar "kotlin-compiler-embeddable-*.jar")
