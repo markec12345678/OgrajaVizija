@@ -21,14 +21,12 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
-import kotlinx.coroutines.launch
 import si.ograjavizija.app.data.AppState
 import si.ograjavizija.app.data.Project
 import si.ograjavizija.app.data.ProjectStore
@@ -47,11 +45,13 @@ private fun roksalEnquiryUrl(category: RoksalCategory): String = when (category)
     RoksalCategory.NAPUSC -> "https://roksal.com/wpc-povprasevanje/"
 }
 
+private const val MAX_Roksal_ATTACHMENT_BYTES = 25L * 1024L * 1024L
+
 private fun candidateAttachmentNote(project: Project): String? {
     val files = listOf("original.jpg", "result.jpg", "product.jpg")
         .map { ProjectStore.file(project, it) }
         .filter { it.exists() }
-    return if (files.sumOf { it.length() } > 25L * 1024L * 1024L)
+    return if (files.sumOf { it.length() } > MAX_Roksal_ATTACHMENT_BYTES)
         "Skupna velikost fotografij presega 25 MB, zato jih aplikacija pri deljenju ne bo pripela. Pošlji jih Roksalu ločeno."
     else null
 }
@@ -63,7 +63,6 @@ fun RoksalQuoteScreen(
     onHome: () -> Unit,
 ) {
     val context = LocalContext.current
-    val scope = rememberCoroutineScope()
     var project by remember { mutableStateOf<Project?>(null) }
 
     LaunchedEffect(projectId) {
