@@ -228,109 +228,178 @@ object RoksalCatalog {
         if (profile.colourIds.isNotEmpty()) profile.colourIds.mapNotNull { colourMap[it] }
         else colours.take(profile.colourCount)
 
+    fun maxSupportCmFor(c: RoksalConfig, p: RoksalProfile): Int? = when (c.category) {
+        RoksalCategory.FASADA -> when (p.id) {
+            "P100" -> 50
+            "ROMB67" -> 80
+            "KUBO8042" -> 100
+            else -> p.maxSupportCm
+        }
+        RoksalCategory.TERASA -> 35
+        RoksalCategory.OGRAJA, RoksalCategory.PREGRADNA_STENA, RoksalCategory.NAPUSC -> p.maxSupportCm
+    }
+
+    fun maxPostCmFor(c: RoksalConfig, p: RoksalProfile): Int? = when (c.category) {
+        RoksalCategory.OGRAJA, RoksalCategory.PREGRADNA_STENA ->
+            if (c.orientation == RoksalOrientation.POKONCNA) p.maxPostVerticalCm else p.maxPostHorizontalCm
+        else -> null
+    }
+
     fun validate(c: RoksalConfig): ValidationResult {
         val p = profileMap[c.profileId] ?: return ValidationResult(false, listOf("Napaka: izbran profil ne obstaja."))
         val warnings = mutableListOf<String>()
-
         if (c.lengthM <= 0f) warnings += "Napaka: dolžina mora biti večja od 0 m."
         if (c.heightM <= 0f) warnings += "Napaka: višina mora biti večja od 0 m."
-        if (c.boardGapMm < 0) warnings += "Napaka: razmak med deskami ne more biti negativen."
-
         if (c.orientation == RoksalOrientation.POKONCNA && !p.vertical)
             warnings += "Napaka: profil ni namenjen pokončni izvedbi."
         if (c.orientation == RoksalOrientation.PRECNA && !p.horizontal)
             warnings += "Napaka: profil ni namenjen prečni izvedbi."
 
-        if (p.maxSupportCm != null && c.supportSpacingCm > p.maxSupportCm)
-            warnings += "Razmak nosilcev " + c.supportSpacingCm.roundToInt() + " cm presega " + p.maxSupportCm + " cm."
-
-        val maxPost = if (c.orientation == RoksalOrientation.POKONCNA) p.maxPostVerticalCm else p.maxPostHorizontalCm
-        val heightLimitedMax = if (c.orientation == RoksalOrientation.POKONCNA && c.heightM > 1.5f && maxPost != null) minOf(maxPost, 150) else maxPost
-        if (heightLimitedMax != null && c.postSpacingCm > heightLimitedMax)
-            warnings += "Razmak stebrov " + c.postSpacingCm.roundToInt() + " cm presega " + heightLimitedMax + " cm za izbrano izvedbo."
-
-        if (p.requiresAluCore)
-            warnings += "Za ta profil je aluminijasto jedro obvezno; to mora biti vključeno v izvedbo."
-
-        if (c.orientation == RoksalOrientation.POKONCNA && c.heightM > 1.5f && p.id in setOf("P100", "P128"))
-            warnings += "Za ograjo nad 150 cm je pri teh profilih potreben manjši razmak stebrov; preveri aktualno montažno pravilo."
-
-        if (c.boardGapMm > 30)
-            warnings += "Razmak večji od 3 cm presega javno navedeni priporočeni razpon; zahtevaj potrditev Roksala."
-
-        if (c.existingStructure == RoksalStructure.OBSTOJECA && heightLimitedMax != null &&
-            c.postSpacingCm > heightLimitedMax)
-            warnings += "Obstoječi stebri ne ustrezajo objavljenemu maksimalnemu razmaku tega profila."
-
+        when (c.category) {
+            RoksalCategory.OGRAJA, RoksalCategory.PREGRADNA_STENA -> {
+                if (c.boardGapMm < 0) warnings += "Napaka: razmak med deskami ne more biti negativen."
+                val maxSupport = maxSupportCmFor(c, p)
+                val maxPost = maxPostCmFor(c, p)
+                if (maxSupport != null && c.supportSpacingCm > maxSupport)
+                    warnings += "Razmak nosilcev " + c.supportSpacingCm.roundToInt() + " cm presega " + maxSupport + " cm."
+                val heightLimitedPost = if (c.orientation == RoksalOrientation.POKONCNA && c.heightM > 1.5f && maxPost != null)
+                    minOf(maxPost, 150) else maxPost
+                if (heightLimitedPost != null && c.postSpacingCm > heightLimitedPost)
+                    warnings += "Razmak stebrov " + c.postSpacingCm.roundToInt() + " cm presega " + heightLimitedPost + " cm."
+                if (c.boardGapMm > 30)
+                    warnings += "Razmak večji od 3 cm presega javno naveden priporočeni razpon; zahtevaj potrditev Roksala."
+                if (p.requiresAluCore)
+                    warnings += "Za ta profil je aluminijasto jedro obvezno; to mora biti vključeno v izvedbo."
+                if (c.category == RoksalCategory.OGRAJA &&
+                    c.existingStructure == RoksalStructure.OBSTOJECA &&
+                    c.postFixing != si.ograjavizija.app.data.PostFixing.NEVEM &&
+                    c.fenceType == si.ograjavizija.app.data.FenceType.NEVEM) {
+                    warnings += "Pri obstoječi konstrukciji določi, ali gre za balkon ali dvoriščno ograjo, da je mogoča pravilna presoja pritrditve."
+                }
+                if (p.id == "ROMB67" && c.orientation == RoksalOrientation.PRECNA &&
+                    c.postSpacingCm > 145f && c.postSpacingCm < 180f) {
+                    warnings += "Pri ROMB prečni izvedbi nad 145 cm preveri dodatno povezavo po montažnih navodilih."
+                }
+                if (p.id == "ROMB67" && c.orientation == RoksalOrientation.PRECNA && c.postSpacingCm >= 180f) {
+                    warnings += "Pri ROMB prečni izvedbi pri 180 cm ali več je po javnem opisu potreben dodatni steber."
+                }
+            }
+            RoksalCategory.FASADA -> {
+                val supportMax = maxSupportCmFor(c, p)
+                if (supportMax != null && c.supportSpacingCm > supportMax)
+                    warnings += "Razmak fasadne podkonstrukcije " + c.supportSpacingCm.roundToInt() + " cm presega " + supportMax + " cm."
+                if (p.id == "KUBO8042" && c.orientation != RoksalOrientation.POKONCNA)
+                    warnings += "KUBO je za fasado konfiguriran samo pokončno."
+                if (p.id == "P100" && c.orientation == RoksalOrientation.POKONCNA && c.supportSpacingCm > 50f)
+                    warnings += "Pri pokončni P100 fasadi je maksimalni razmak prečnih letev 50 cm."
+                if (p.id == "ROMB67" && c.supportSpacingCm > 80f)
+                    warnings += "Pri fasadnem ROMB je maksimalni razmak macesnovih moral 80 cm."
+                if (c.facadeOpeningNotes.isBlank())
+                    warnings += "Za končno ponudbo dodaj dimenzije oken/vrat oziroma opombo, če odprtin ni."
+                if (p.id == "KUBO8042" && c.kuboReinforcement == si.ograjavizija.app.data.KuboReinforcement.NEVEM)
+                    warnings += "Pri KUBO določi notranjo ojačitev glede na razpon; izbira vpliva na konstrukcijo."
+            }
+            RoksalCategory.TERASA -> {
+                if (c.terraceWidthM <= 0f) warnings += "Napaka: vnesi širino terase."
+                if (c.boardGapMm !in 5..6) warnings += "Roksal za teraso navaja razmak 5–6 mm."
+                if (c.terraceSlopeCmPerM < 1f) warnings += "Padec terase mora biti najmanj 1 cm/m."
+                if (c.terraceHeightCm < 4.5f) warnings += "Minimalna navedena višina terase je 4,5 cm."
+                if (c.terraceScrewToBase && c.terraceBase == si.ograjavizija.app.data.TerraceBase.HIDROIZOLACIJA)
+                    warnings += "Pri hidroizolaciji se podložne letve ne privijačijo v tla."
+                if (c.terraceBase == si.ograjavizija.app.data.TerraceBase.ZEMLJA_TRAVA)
+                    warnings += "WPC terase ni dovoljeno polagati neposredno na travo ali zemljo."
+                if (c.terraceBase == si.ograjavizija.app.data.TerraceBase.PESek)
+                    warnings += "Pesek sam ni dovolj stabilna podlaga; Roksal priporoča pripravljeno stabilno osnovo in alu mrežo."
+                if (c.terraceSubstructure == si.ograjavizija.app.data.TerraceSubstructure.WPC_LETVE &&
+                    c.terraceBase != si.ograjavizija.app.data.TerraceBase.BETON &&
+                    c.terraceBase != si.ograjavizija.app.data.TerraceBase.NEVEM)
+                    warnings += "Pri neravni podlagi Roksal priporoča aluminijasto podkonstrukcijo namesto točkovno podprte WPC letve."
+            }
+            RoksalCategory.NAPUSC -> {
+                if (p.id != "P100") warnings += "Za napušč je v trenutnem konfiguratorju podprt P100."
+                if (c.supportSpacingCm > 80f) warnings += "Razmak podkonstrukcije je treba preveriti glede na izbrano izvedbo; privzeto ga omejujemo na 80 cm."
+            }
+        }
         return ValidationResult(warnings.none { it.startsWith("Napaka:") }, warnings)
     }
 
     fun estimate(c: RoksalConfig): MaterialEstimate {
         val p = profileMap[c.profileId] ?: return MaterialEstimate(0, 0f, 0, 0, 0, 0, emptyList(), 0, listOf("Profil ni znan."))
-        val gap = max(0, c.boardGapMm)
-        val pitchMm = max(1, p.faceWidthMm + gap)
-        val posts = max(2, ceil(c.lengthM * 100f / max(1f, c.postSpacingCm)).toInt() + 1)
-
-        return if (c.orientation == RoksalOrientation.POKONCNA) {
-            val verticalBoards = ceil(c.lengthM * 1000f / pitchMm).toInt()
-            val stock = p.stockLengthsMm.maxOrNull() ?: 5800
-            val heightMm = max(1, (c.heightM * 1000f).roundToInt())
-            val boardsPerStock = max(1, stock / heightMm)
-            val stockPieces = ceil(verticalBoards.toFloat() / boardsPerStock).toInt()
-            val supports = max(2, ceil(c.lengthM * 100f / max(1f, c.supportSpacingCm)).toInt() + 1)
-            MaterialEstimate(
-                boards = stockPieces,
-                stockLengthM = stock / 1000f,
-                posts = posts,
-                supports = supports,
-                screws = verticalBoards * 2,
-                handles = if (c.category == RoksalCategory.OGRAJA && c.handleIncluded) 1 else 0,
-                components = componentsFor(c),
-                estimatedWastePercent = 8,
-                notes = listOf(
-                    "Izračun je informativen in ne nadomešča Roksal razreza.",
-                    "Standardna zaloga profila: " + (stock / 1000f) + " m.",
-                    "Pri vratih in kotih so potrebne dodatne komponente."
+        return when (c.category) {
+            RoksalCategory.TERASA -> {
+                val lengthMm = (c.lengthM * 1000f).coerceAtLeast(1f)
+                val widthMm = (c.terraceWidthM * 1000f).coerceAtLeast(1f)
+                val pitch = p.faceWidthMm + c.boardGapMm
+                val rows = ceil(widthMm / pitch).toInt()
+                val stock = p.stockLengthsMm.maxOrNull() ?: 4000
+                val piecesPerRow = ceil(lengthMm / stock).toInt().coerceAtLeast(1)
+                val boards = rows * piecesPerRow
+                val underlaySpacing = 34f
+                val underlayRows = ceil(widthMm / (underlaySpacing * 10f)).toInt().coerceAtLeast(2)
+                MaterialEstimate(
+                    boards = boards,
+                    stockLengthM = stock / 1000f,
+                    posts = 0,
+                    supports = underlayRows,
+                    screws = boards * 6,
+                    handles = 0,
+                    components = componentsFor(c),
+                    estimatedWastePercent = 8,
+                    notes = listOf(
+                        "Površina približno " + "%.2f".format(java.util.Locale.US, c.lengthM * c.terraceWidthM) + " m².",
+                        "Podložne letve/alu elementi so ocenjeni na razmak približno 33–35 cm.",
+                        "Končni smer polaganja in razrez mora potrditi Roksal."
+                    )
                 )
-            )
-        } else {
-            val rows = ceil(c.heightM * 1000f / pitchMm).toInt()
-            val stock = p.stockLengthsMm.maxOrNull() ?: 4000
-            val piecesPerRow = max(1, ceil(c.lengthM * 1000f / stock).toInt())
-            MaterialEstimate(
-                boards = rows * piecesPerRow,
-                stockLengthM = stock / 1000f,
-                posts = posts,
-                supports = posts,
-                screws = rows * piecesPerRow * 2,
-                handles = if (c.category == RoksalCategory.OGRAJA && c.handleIncluded) 1 else 0,
-                components = componentsFor(c),
-                estimatedWastePercent = 10,
-                notes = listOf(
-                    "Izračun je informativen in predvideva polne vrste po podani dolžini.",
-                    "Optimalni razrez in dodatne komponente potrdi Roksal."
-                )
-            )
+            }
+            else -> {
+                val gap = max(0, c.boardGapMm)
+                val pitchMm = max(1, p.faceWidthMm + gap)
+                if (c.orientation == RoksalOrientation.POKONCNA) {
+                    val verticalBoards = ceil(c.lengthM * 1000f / pitchMm).toInt()
+                    val stock = p.stockLengthsMm.maxOrNull() ?: 5800
+                    val heightMm = max(1, (c.heightM * 1000f).roundToInt())
+                    val boardsPerStock = max(1, stock / heightMm)
+                    val stockPieces = ceil(verticalBoards.toFloat() / boardsPerStock).toInt()
+                    val maxSupport = maxSupportCmFor(c, p) ?: c.supportSpacingCm
+                    val supports = max(2, ceil(c.lengthM * 100f / maxSupport).toInt() + 1)
+                    MaterialEstimate(
+                        boards = stockPieces,
+                        stockLengthM = stock / 1000f,
+                        posts = if (c.category == RoksalCategory.OGRAJA || c.category == RoksalCategory.PREGRADNA_STENA)
+                            max(2, ceil(c.lengthM * 100f / max(1f, c.postSpacingCm)).toInt() + 1) else 0,
+                        supports = supports,
+                        screws = verticalBoards * 2,
+                        handles = if (c.category == RoksalCategory.OGRAJA && c.handleIncluded) 1 else 0,
+                        components = componentsFor(c),
+                        estimatedWastePercent = 8,
+                        notes = listOf(
+                            "Izračun je informativen in ne nadomešča Roksal razreza.",
+                            "Standardna zaloga profila: " + (stock / 1000f) + " m."
+                        )
+                    )
+                } else {
+                    val rows = ceil(c.heightM * 1000f / pitchMm).toInt()
+                    val stock = p.stockLengthsMm.maxOrNull() ?: 4000
+                    val piecesPerRow = max(1, ceil(c.lengthM * 1000f / stock).toInt())
+                    MaterialEstimate(
+                        boards = rows * piecesPerRow,
+                        stockLengthM = stock / 1000f,
+                        posts = if (c.category == RoksalCategory.OGRAJA || c.category == RoksalCategory.PREGRADNA_STENA)
+                            max(2, ceil(c.lengthM * 100f / max(1f, c.postSpacingCm)).toInt() + 1) else 0,
+                        supports = max(2, ceil(c.lengthM * 100f / max(1f, c.supportSpacingCm)).toInt() + 1),
+                        screws = rows * piecesPerRow * 2,
+                        handles = if (c.category == RoksalCategory.OGRAJA && c.handleIncluded) 1 else 0,
+                        components = componentsFor(c),
+                        estimatedWastePercent = 10,
+                        notes = listOf(
+                            "Izračun je informativen; optimalen razrez je odvisen od dejanskih segmentov.",
+                            "Spoji desk naj program vedno načrtuje nad stebrom oziroma ustrezno nosilno točko."
+                        )
+                    )
+                }
+            }
         }
-    }
-
-    fun componentsFor(c: RoksalConfig): List<RoksalComponent> {
-        val out = mutableListOf<RoksalComponent>()
-        if (c.category == RoksalCategory.OGRAJA && c.handleIncluded) out += components.first { it.id == "HANDLE_92" }
-        out += components.first { it.id == "RF_SCREW" }
-        if (c.profileId == "ROMB67") {
-            out += components.first { it.id == "ROMB_ALU" }
-            out += components.first { it.id == "ROMB_CAP_LR" }
-            if (c.orientation == RoksalOrientation.PRECNA) out += components.first { it.id == "L_BRACKET" }
-        }
-        if (c.category == RoksalCategory.TERASA) {
-            out += components.first { it.id == "TERRACE_SUB" }
-            out += components.first { it.id == "TERRACE_ALU" }
-            out += components.first { it.id == "TERRACE_TRIM" }
-            out += components.first { it.id == "TERRACE_CLIP" }
-        }
-        if (c.category == RoksalCategory.FASADA) out += components.first { it.id == "FACADE_CLIP" }
-        return out.distinctBy { it.id }
     }
 
     fun renderTechnicalPreview(config: RoksalConfig, width: Int = 1200, height: Int = 700): Bitmap {
