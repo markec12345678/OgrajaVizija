@@ -53,7 +53,7 @@ import java.io.File
 
 /** Korak 5+6: ustvari vizualizacijo, primerjaj PREJ|POTEM in A|B|C|D, shrani. */
 @Composable
-fun ResultScreen(projectId: String?, onNewRailing: () -> Unit, onBack: () -> Unit, onHome: () -> Unit) {
+fun ResultScreen(projectId: String?, onNewRailing: () -> Unit, onBack: () -> Unit, onHome: () -> Unit, onQuote: () -> Unit) {
     val scope = rememberCoroutineScope()
     var project by remember { mutableStateOf<Project?>(null) }
     var before by remember { mutableStateOf<Bitmap?>(null) }
@@ -186,8 +186,12 @@ fun ResultScreen(projectId: String?, onNewRailing: () -> Unit, onBack: () -> Uni
             }
             Spacer(Modifier.height(8.dp))
         }
-        Row(Modifier.fillMaxWidth().padding(horizontal = 12.dp)) {
-            OutlinedButton(onClick = onHome, modifier = Modifier.fillMaxWidth()) { Text("🏠 Domov") }
+        Row(
+            Modifier.fillMaxWidth().padding(horizontal = 12.dp),
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+        ) {
+            OutlinedButton(onClick = onHome, modifier = Modifier.weight(1f)) { Text("🏠 Domov") }
+            Button(onClick = onQuote, modifier = Modifier.weight(1f)) { Text("📩 Povpraševanje") }
         }
         Spacer(Modifier.height(10.dp))
     }
