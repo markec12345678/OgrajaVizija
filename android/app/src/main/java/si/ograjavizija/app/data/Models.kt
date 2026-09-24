@@ -200,7 +200,7 @@ enum class FacadeLayout {
 enum class KuboReinforcement {
     BREZ_DO_120,
     ALU_20X60_DO_260,
-    PROJEKTNA_OJAČITEV,
+    PROJEKTNA_OJACITEV,
     NEVEM,
 }
 
