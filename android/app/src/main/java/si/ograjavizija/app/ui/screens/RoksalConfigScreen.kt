@@ -527,32 +527,47 @@ fun RoksalConfigScreen(
                 OutlinedTextField(
                     value = length.toString(),
                     onValueChange = { it.toFloatOrNull()?.let { length = it } },
-                    label = { Text("Dolžina m") },
+                    label = { Text(if (category == RoksalCategory.TERASA) "Dolžina terase m" else "Dolžina m") },
                     modifier = Modifier.weight(1f),
                     singleLine = true
                 )
                 OutlinedTextField(
-                    value = height.toString(),
-                    onValueChange = { it.toFloatOrNull()?.let { height = it } },
-                    label = { Text("Višina m") },
+                    value = if (category == RoksalCategory.TERASA) terraceWidth.toString() else height.toString(),
+                    onValueChange = {
+                        it.toFloatOrNull()?.let { value ->
+                            if (category == RoksalCategory.TERASA) terraceWidth = value else height = value
+                        }
+                    },
+                    label = { Text(if (category == RoksalCategory.TERASA) "Širina terase m" else "Višina m") },
                     modifier = Modifier.weight(1f),
                     singleLine = true
                 )
             }
-            Spacer(Modifier.height(8.dp))
-            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                OutlinedTextField(
-                    value = postSpacing.toInt().toString(),
-                    onValueChange = { it.toFloatOrNull()?.let { postSpacing = it } },
-                    label = { Text("Razmak stebrov cm") },
-                    modifier = Modifier.weight(1f),
-                    singleLine = true
-                )
+            if (category == RoksalCategory.OGRAJA || category == RoksalCategory.PREGRADNA_STENA) {
+                Spacer(Modifier.height(8.dp))
+                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    OutlinedTextField(
+                        value = postSpacing.toInt().toString(),
+                        onValueChange = { it.toFloatOrNull()?.let { postSpacing = it } },
+                        label = { Text("Razmak stebrov cm") },
+                        modifier = Modifier.weight(1f),
+                        singleLine = true
+                    )
+                    OutlinedTextField(
+                        value = supportSpacing.toInt().toString(),
+                        onValueChange = { it.toFloatOrNull()?.let { supportSpacing = it } },
+                        label = { Text("Razmak nosilcev cm") },
+                        modifier = Modifier.weight(1f),
+                        singleLine = true
+                    )
+                }
+            } else if (category == RoksalCategory.FASADA || category == RoksalCategory.NAPUSC) {
+                Spacer(Modifier.height(8.dp))
                 OutlinedTextField(
                     value = supportSpacing.toInt().toString(),
                     onValueChange = { it.toFloatOrNull()?.let { supportSpacing = it } },
-                    label = { Text("Nosilci cm") },
-                    modifier = Modifier.weight(1f),
+                    label = { Text("Razmak podkonstrukcije cm") },
+                    modifier = Modifier.fillMaxWidth(),
                     singleLine = true
                 )
             }
