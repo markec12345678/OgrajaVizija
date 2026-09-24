@@ -10,6 +10,7 @@ AI je opcija prek providerjev; brez GPU-ja delujeta 🟢 GEOMETRY in 🟢 LAMA(T
 """
 from __future__ import annotations
 
+import hmac
 import json
 import os
 import time
@@ -18,7 +19,7 @@ import uuid
 import numpy as np
 from fastapi import FastAPI, File, Form, Header, HTTPException, Request, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import Response
+from fastapi.responses import FileResponse, Response
 
 from .config import settings
 from .providers.base import FinalizeRequest
@@ -243,7 +244,7 @@ def _require_inquiry_auth(authorization: str) -> None:
     if not expected:
         raise HTTPException(503, "Roksal inquiry inbox ni konfiguriran.")
     scheme, _, provided = authorization.partition(" ")
-    if scheme.lower() != "bearer" or not provided.strip() or provided.strip() != expected:
+    if scheme.lower() != "bearer" or not provided.strip() or not hmac.compare_digest(provided.strip(), expected):
         raise HTTPException(401, "Neveljaven ali manjkajoč bearer token.")
 
 
@@ -294,6 +295,8 @@ async def create_inquiry(
         raise HTTPException(400, f"Neveljaven JSON payload: {exc.msg}") from exc
 
     project = data.get("project")
+    if len(payload.encode("utf-8")) > settings.inquiry_max_bytes:
+        raise HTTPException(413, "Payload presega dovoljeno omejitev 25 MB.")
     if not isinstance(project, dict) or not project.get("id"):
         raise HTTPException(400, "Payload ne vsebuje veljavnega projekta.")
     inquiry_id = "inq_" + uuid.uuid4().hex
@@ -398,6 +401,25 @@ def get_inquiry(inquiry_id: str, authorization: str = Header("")):
         name for name in os.listdir(directory) if name not in {"payload.json", "meta.json"}
     )
     return payload
+
+
+@app.get("/inquiries/{inquiry_id}/files/{filename}")
+def get_inquiry_file(
+    inquiry_id: str,
+    filename: str,
+    authorization: str = Header(""),
+):
+    _require_inquiry_auth(authorization)
+    allowed = {"original.jpg", "original.jpeg", "original.png", "original.webp",
+               "result.jpg", "result.jpeg", "result.png", "result.webp",
+               "product.jpg", "product.jpeg", "product.png", "product.webp"}
+    safe_name = os.path.basename(filename).lower()
+    if safe_name not in allowed:
+        raise HTTPException(400, "Nepodprta priponka.")
+    path = os.path.join(_inquiry_root(), inquiry_id, safe_name)
+    if not os.path.isfile(path):
+        raise HTTPException(404, "Priponka ne obstaja.")
+    return FileResponse(path)
 
 
 @app.patch("/inquiries/{inquiry_id}")
