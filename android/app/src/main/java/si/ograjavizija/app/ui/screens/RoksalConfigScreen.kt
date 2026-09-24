@@ -383,6 +383,21 @@ fun RoksalConfigScreen(
                     },
                     modifier = Modifier.fillMaxWidth()
                 ) { Text("🌐 Odpri uradni Roksal katalog") }
+                if (it.referenceImageUrl.isNotBlank()) {
+                    Spacer(Modifier.height(6.dp))
+                    OutlinedButton(
+                        onClick = {
+                            val intent = android.content.Intent(
+                                android.content.Intent.ACTION_VIEW,
+                                android.net.Uri.parse(it.referenceImageUrl)
+                            )
+                            context.startActivity(
+                                android.content.Intent.createChooser(intent, "Odpri uradno referenčno fotografijo")
+                            )
+                        },
+                        modifier = Modifier.fillMaxWidth()
+                    ) { Text("📷 Uradna referenčna fotografija") }
+                }
                 if (it.mountingOptions.isNotEmpty()) {
                     Spacer(Modifier.height(8.dp))
                     Text("Način polaganja profila", style = MaterialTheme.typography.titleSmall)
