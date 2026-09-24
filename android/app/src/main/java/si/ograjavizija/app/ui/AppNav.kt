@@ -37,7 +37,7 @@ fun AppNav() {
     when (route) {
         Route.HOME -> HomeScreen(
             onNew = { id -> openProjectId = id; route = Route.SCENE },
-            onOpen = { id -> openProjectId = id; route = Route.RESULT },
+            onOpen = { id -> openProjectId = id; route = Route.SCENE },
             onSettings = { route = Route.SETTINGS },
         )
         Route.SCENE -> SceneScreen(projectId = openProjectId, onNext = { route = Route.PRODUCT }, onBack = { route = Route.HOME })
