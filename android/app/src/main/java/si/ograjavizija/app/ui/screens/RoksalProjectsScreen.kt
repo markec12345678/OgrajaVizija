@@ -44,7 +44,7 @@ import java.util.Date
 import java.util.Locale
 
 @Composable
-fun RoksalProjectsScreen(onBack: () -> Unit) {
+fun RoksalProjectsScreen(onBack: () -> Unit, onSettings: () -> Unit) {
     val scope = rememberCoroutineScope()
     var projects by remember { mutableStateOf(ProjectStore.list()) }
     var filter by remember { mutableStateOf<ProjectStatus?>(null) }
@@ -159,10 +159,7 @@ fun RoksalProjectsScreen(onBack: () -> Unit) {
                 ) { Text(if (remoteBusy) "Osvežujem…" else "↻ Osveži inbox") }
                 OutlinedButton(
                     enabled = AppState.serverUrl.isNotBlank() && AppState.inquiryToken.isNotBlank(),
-                    onClick = {
-                        AppState.updateServerUrl(AppState.serverUrl)
-                        remoteMessage = "Token je shranjen v Nastavitvah."
-                    },
+                    onClick = onSettings,
                     modifier = Modifier.weight(1f)
                 ) { Text("Nastavitve") }
             }
