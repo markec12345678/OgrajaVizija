@@ -23,6 +23,7 @@ data class Project(
     val product: ImageRef? = null,
     val placement: Placement? = null,
     val maskMeta: MaskMeta? = null,
+    val config: RoksalConfig? = null,
     val variants: List<Variant> = emptyList(),
     val activeVariantId: String? = null,
     val settings: RenderSettings = RenderSettings(),
@@ -77,7 +78,7 @@ data class MaskMeta(
 )
 
 @Serializable
-enum class MaskSource { MANUAL, BRUSH, RECT, TAP_SEGMENT, SAM_SERVER, IMPORT }
+enum class MaskSource { MANUAL, BRUSH, RECT, TAP_SEGMENT, AUTO_SEGMENT, SAM_SERVER, IMPORT }
 
 /**
  * Nastavitve izračuna. [mode] določa, kje teče AI:
@@ -127,6 +128,46 @@ enum class AiProvider {
     SDXL_INPAINT_IPA,      // starejša pot (kot v osnovnem repoju) - samo za primerjavo
     LAMA_ONLY,             // brez difuzije: samo odstranitev + naša geometrijska sestava
 }
+
+@Serializable
+enum class RoksalCategory { OGRAJA, PREGRADNA_STENA, TERASA, FASADA, NAPUSC }
+
+@Serializable
+enum class RoksalOrientation { POKONCNA, PRECNA }
+
+@Serializable
+enum class RoksalPrivacy { ODPRTA, SREDNJA, ZASEBNA }
+
+@Serializable
+enum class RoksalStructure { NOVA, OBSTOJECA, NEVEM }
+
+@Serializable
+enum class MeasurementStatus { OCENA, POTRJENO }
+
+@Serializable
+data class RoksalConfig(
+    val category: RoksalCategory = RoksalCategory.OGRAJA,
+    val orientation: RoksalOrientation = RoksalOrientation.POKONCNA,
+    val profileId: String = "P128",
+    val colourId: String = "BURMA_TEAK",
+    val boardGapMm: Int = 10,
+    val privacy: RoksalPrivacy = RoksalPrivacy.SREDNJA,
+    val lengthM: Float = 10f,
+    val heightM: Float = 1.5f,
+    val postSpacingCm: Float = 150f,
+    val supportSpacingCm: Float = 100f,
+    val segmentCount: Int = 1,
+    val gateType: String = "BREZ",
+    val gateWidthM: Float = 0f,
+    val gateHeightM: Float = 0f,
+    val existingStructure: RoksalStructure = RoksalStructure.NEVEM,
+    val measurementStatus: MeasurementStatus = MeasurementStatus.OCENA,
+    val customerName: String = "",
+    val phone: String = "",
+    val email: String = "",
+    val address: String = "",
+    val notes: String = "",
+)
 
 @Serializable
 data class Variant(
