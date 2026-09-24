@@ -105,7 +105,7 @@ fun PlaceScreen(projectId: String?, onNext: () -> Unit, onBack: () -> Unit) {
         val pl = placement
         if (s != null && pl != null) {
             ZoomPanBox(
-                image = (preview ?: s).copy(android.graphics.Bitmap.Config.ARGB_8888, false).asImageBitmap(),
+                image = (preview ?: s).asImageBitmap(),
                 modifier = Modifier.weight(1f),
                 onDown = { x, y ->
                     // ali je dotik blizu katerega vogala?
