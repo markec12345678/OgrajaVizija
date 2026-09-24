@@ -59,6 +59,8 @@ fun RoksalProjectsScreen(onBack: () -> Unit) {
             listOf(
                 ProjectStatus.DRAFT,
                 ProjectStatus.CONFIGURED,
+                ProjectStatus.VISUALIZED,
+                ProjectStatus.QUOTE_PREPARED,
                 ProjectStatus.QUOTE_REQUESTED,
                 ProjectStatus.ROKSAL_REVIEW,
                 ProjectStatus.SITE_MEASUREMENT,
