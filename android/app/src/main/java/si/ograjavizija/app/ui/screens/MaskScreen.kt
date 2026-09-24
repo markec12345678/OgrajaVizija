@@ -31,6 +31,7 @@ import si.ograjavizija.app.data.AppState
 import si.ograjavizija.app.data.Project
 import si.ograjavizija.app.data.ProjectController
 import si.ograjavizija.app.data.ProjectStore
+import si.ograjavizija.app.data.RoksalCategory
 import si.ograjavizija.app.data.MaskSource
 import si.ograjavizija.app.imaging.MaskEditor
 import si.ograjavizija.app.segmentation.OnDeviceSegmenter
@@ -65,11 +66,17 @@ fun MaskScreen(projectId: String?, onNext: () -> Unit, onBack: () -> Unit) {
         scene = s
         editor = ProjectController.loadMask(p)
         maskBmp = editor?.toBitmap()
-        segReady = withContext(Dispatchers.IO) {
-            if (OnDeviceSegmenter.modelReady) true
-            else OnDeviceSegmenter.ensureModel(ctx) != null && OnDeviceSegmenter.init(ctx)
-        }
-        if (segReady) status = "🟢 tap-segmentacija pripravljena"
+        val autoSupported = p.config?.category == RoksalCategory.OGRAJA
+        segReady = if (autoSupported) {
+            withContext(Dispatchers.IO) {
+                if (OnDeviceSegmenter.modelReady) true
+                else OnDeviceSegmenter.ensureModel(ctx) != null && OnDeviceSegmenter.init(ctx)
+            }
+        } else false
+        status = if (autoSupported && segReady)
+            "🟢 samodejna + ročna segmentacija pripravljena"
+        else
+            "🟢 ročno označi območje, nato ga po potrebi popravi s čopičem."
     }
 
     fun refresh() {
@@ -77,7 +84,7 @@ fun MaskScreen(projectId: String?, onNext: () -> Unit, onBack: () -> Unit) {
     }
 
     Column(Modifier.fillMaxSize()) {
-        StepHeader(3, "3 · Označi staro ograjo", onBack)
+        StepHeader(3, "3 · Označi območje za zamenjavo", onBack)
         val s = scene
         if (s != null) {
             ZoomPanBox(
@@ -145,6 +152,7 @@ fun MaskScreen(projectId: String?, onNext: () -> Unit, onBack: () -> Unit) {
                     Slider(value = brush, onValueChange = { brush = it }, valueRange = 6f..160f, modifier = Modifier.weight(1f))
                 }
                 if (rectStart != null) Text("Pravokotnik: tapni še nasprotni vogal.", color = Warn, style = MaterialTheme.typography.labelSmall)
+                if (project?.config?.category == RoksalCategory.OGRAJA) {
                 Button(
                     onClick = {
                         val e = editor ?: return@Button
@@ -173,8 +181,11 @@ fun MaskScreen(projectId: String?, onNext: () -> Unit, onBack: () -> Unit) {
                 ) {
                     Text(if (autoBusy) "⏳ Samodejno…" else "✨ Samodejno označi ograjo")
                 }
+                }
                 Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    Button(onClick = {
+                    Button(
+                        enabled = editor?.mask?.any { (it.toInt() and 0xFF) > 0 } == true,
+                        onClick = {
                         val e = editor ?: return@Button
                         val p = project ?: return@Button
                         scope.launch {
