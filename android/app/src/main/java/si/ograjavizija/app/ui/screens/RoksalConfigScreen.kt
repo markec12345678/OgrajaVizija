@@ -39,6 +39,7 @@ import si.ograjavizija.app.data.MeasurementStatus
 import si.ograjavizija.app.data.FenceType
 import si.ograjavizija.app.data.PostFixing
 import si.ograjavizija.app.data.PostAppearance
+import si.ograjavizija.app.data.CustomerType
 import si.ograjavizija.app.data.MeasurementMethod
 import si.ograjavizija.app.data.DeliveryPreference
 import si.ograjavizija.app.data.Project
@@ -93,7 +94,13 @@ fun RoksalConfigScreen(
     var fenceType by remember { mutableStateOf(FenceType.NEVEM) }
     var postFixing by remember { mutableStateOf(PostFixing.NEVEM) }
     var postAppearance by remember { mutableStateOf(PostAppearance.NEVEM) }
+    var customerType by remember { mutableStateOf(CustomerType.FIZICNA_OSEBA) }
     var customerName by remember { mutableStateOf("") }
+    var companyName by remember { mutableStateOf("") }
+    var taxNumber by remember { mutableStateOf("") }
+    var invoiceAddress by remember { mutableStateOf("") }
+    var deliveryAddressDifferent by remember { mutableStateOf(false) }
+    var deliveryAddress by remember { mutableStateOf("") }
     var phone by remember { mutableStateOf("") }
     var email by remember { mutableStateOf("") }
     var address by remember { mutableStateOf("") }
@@ -134,7 +141,13 @@ fun RoksalConfigScreen(
             fenceType = old.fenceType
             postFixing = old.postFixing
             postAppearance = old.postAppearance
+            customerType = old.customerType
             customerName = old.customerName
+            companyName = old.companyName
+            taxNumber = old.taxNumber
+            invoiceAddress = old.invoiceAddress
+            deliveryAddressDifferent = old.deliveryAddressDifferent
+            deliveryAddress = old.deliveryAddress
             phone = old.phone
             email = old.email
             address = old.address
@@ -191,9 +204,15 @@ fun RoksalConfigScreen(
             referenceLabel = referenceLabel,
             segmentLengthsText = segmentLengths,
             deliveryPreference = delivery,
+            customerType = customerType,
             customerName = customerName,
+            companyName = companyName,
+            taxNumber = taxNumber,
             phone = phone,
             email = email,
+            invoiceAddress = invoiceAddress,
+            deliveryAddressDifferent = deliveryAddressDifferent,
+            deliveryAddress = deliveryAddress,
             address = address,
             notes = notes,
         )
@@ -510,20 +529,39 @@ fun RoksalConfigScreen(
             Text("Dostava", style = MaterialTheme.typography.titleSmall)
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.horizontalScroll(rememberScrollState())) {
                 FilterChip(selected = delivery == DeliveryPreference.DOSTAVA, onClick = { delivery = DeliveryPreference.DOSTAVA }, label = { Text("Dostava") })
+                FilterChip(selected = delivery == DeliveryPreference.DOSTAVA_IN_MONTAZA, onClick = { delivery = DeliveryPreference.DOSTAVA_IN_MONTAZA }, label = { Text("Dostava + montaža") })
                 FilterChip(selected = delivery == DeliveryPreference.OSEBNI_PREVZEM, onClick = { delivery = DeliveryPreference.OSEBNI_PREVZEM }, label = { Text("Osebni prevzem") })
                 FilterChip(selected = delivery == DeliveryPreference.NEVEM, onClick = { delivery = DeliveryPreference.NEVEM }, label = { Text("Ne vem") })
             }
 
             Spacer(Modifier.height(10.dp))
-            Text("Podatki stranke", style = MaterialTheme.typography.titleMedium)
+            Text("Podatki za ponudbo", style = MaterialTheme.typography.titleMedium)
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.horizontalScroll(rememberScrollState())) {
+                FilterChip(selected = customerType == CustomerType.FIZICNA_OSEBA, onClick = { customerType = CustomerType.FIZICNA_OSEBA }, label = { Text("Fizična oseba") })
+                FilterChip(selected = customerType == CustomerType.PODJETJE, onClick = { customerType = CustomerType.PODJETJE }, label = { Text("Podjetje") })
+            }
             OutlinedTextField(customerName, { customerName = it }, label = { Text("Ime in priimek / podjetje") }, modifier = Modifier.fillMaxWidth(), singleLine = true)
+            if (customerType == CustomerType.PODJETJE) {
+                Spacer(Modifier.height(6.dp))
+                OutlinedTextField(companyName, { companyName = it }, label = { Text("Naziv podjetja") }, modifier = Modifier.fillMaxWidth(), singleLine = true)
+                Spacer(Modifier.height(6.dp))
+                OutlinedTextField(taxNumber, { taxNumber = it }, label = { Text("Davčna številka") }, modifier = Modifier.fillMaxWidth(), singleLine = true)
+            }
             Spacer(Modifier.height(6.dp))
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 OutlinedTextField(phone, { phone = it }, label = { Text("Telefon") }, modifier = Modifier.weight(1f), singleLine = true)
                 OutlinedTextField(email, { email = it }, label = { Text("E-pošta") }, modifier = Modifier.weight(1f), singleLine = true)
             }
             Spacer(Modifier.height(6.dp))
+            OutlinedTextField(invoiceAddress, { invoiceAddress = it }, label = { Text("Naslov za račun") }, modifier = Modifier.fillMaxWidth(), singleLine = true)
+            Spacer(Modifier.height(6.dp))
             OutlinedTextField(address, { address = it }, label = { Text("Lokacija projekta") }, modifier = Modifier.fillMaxWidth(), singleLine = true)
+            Spacer(Modifier.height(6.dp))
+            FilterChip(selected = deliveryAddressDifferent, onClick = { deliveryAddressDifferent = !deliveryAddressDifferent }, label = { Text("Dostava na drug naslov") })
+            if (deliveryAddressDifferent) {
+                Spacer(Modifier.height(6.dp))
+                OutlinedTextField(deliveryAddress, { deliveryAddress = it }, label = { Text("Naslov dostave") }, modifier = Modifier.fillMaxWidth(), singleLine = true)
+            }
             Spacer(Modifier.height(6.dp))
             OutlinedTextField(notes, { notes = it }, label = { Text("Opombe") }, modifier = Modifier.fillMaxWidth(), minLines = 2)
 
