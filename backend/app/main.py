@@ -401,18 +401,17 @@ def get_inquiry(inquiry_id: str, authorization: str = Header("")):
 
 
 @app.patch("/inquiries/{inquiry_id}")
-def update_inquiry(
+async def update_inquiry(
     inquiry_id: str,
     request: Request,
     authorization: str = Header(""),
 ):
     _require_inquiry_auth(authorization)
-    import asyncio
     directory = os.path.join(_inquiry_root(), inquiry_id)
     meta_path = os.path.join(directory, "meta.json")
     if not os.path.isfile(meta_path):
         raise HTTPException(404, "Povpraševanje ne obstaja.")
-    body = asyncio.run(request.json())
+    body = await request.json()
     status = str(body.get("status", "")).strip()
     if status not in INQUIRY_STATUSES:
         raise HTTPException(400, "Neveljaven status.")
