@@ -432,38 +432,151 @@ object RoksalCatalog {
         return out.distinctBy { it.id }
     }
 
-    fun renderTechnicalPreview(config: RoksalConfig, width: Int = 1200, height: Int = 700): Bitmap {
+    fun renderProfilePreview(profileId: String, colourId: String, width: Int = 720, height: Int = 420, surfaceId: String = "", mountingVariant: String = ""): Bitmap {
         val bmp = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
         val canvas = Canvas(bmp)
-        val colour = colour(config.colourId).previewArgb
-        val boardPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply { color = colour }
-        val framePaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+        val baseColour = colour(colourId).previewArgb
+        val profile = profile(profileId)
+
+        val productPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+            color = baseColour
+        }
+        val detailPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+            color = shade(baseColour, 0.72f)
             style = Paint.Style.STROKE
-            strokeWidth = 18f
-            color = android.graphics.Color.rgb(55, 60, 68)
+            strokeWidth = 3.5f
+        }
+        val darkPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+            color = android.graphics.Color.argb(150, 25, 28, 32)
+            style = Paint.Style.STROKE
+            strokeWidth = 2.5f
         }
 
-        val left = 70f
-        val right = width - 70f
-        val top = 80f
-        val bottom = height - 70f
-        val gap = max(4f, config.boardGapMm * 1.2f)
-        val boardPx = max(10f, minOf(70f, profile(config.profileId).faceWidthMm / 2f))
+        val left = 28f
+        val right = width - 28f
+        val top = 42f
+        val bottom = height - 38f
+        val spacing = 9f
 
-        if (config.orientation == RoksalOrientation.POKONCNA) {
-            var x = left
-            while (x < right) {
-                canvas.drawRect(RectF(x, top, minOf(right, x + boardPx), bottom), boardPaint)
-                x += boardPx + gap
+        when (profileId) {
+            "ROMB67" -> {
+                var x = left - 20f
+                while (x < right + 30f) {
+                    val path = android.graphics.Path().apply {
+                        moveTo(x + 34f, top)
+                        lineTo(x + 67f, (top + bottom) / 2f)
+                        lineTo(x + 34f, bottom)
+                        lineTo(x, (top + bottom) / 2f)
+                        close()
+                    }
+                    canvas.drawPath(path, productPaint)
+                    canvas.drawPath(path, darkPaint)
+                    x += 76f + spacing
+                }
+                val aluPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+                    color = android.graphics.Color.argb(170, 185, 190, 198)
+                    strokeWidth = 4f
+                }
+                var coreX = left + 8f
+                while (coreX < right) {
+                    canvas.drawLine(coreX + 33f, top + 20f, coreX + 33f, bottom - 20f, aluPaint)
+                    coreX += 86f
+                }
             }
-        } else {
-            var y = top
-            while (y < bottom) {
-                canvas.drawRect(RectF(left, y, right, minOf(bottom, y + boardPx)), boardPaint)
-                y += boardPx + gap
+            "DESKA150" -> drawHorizontalBoards(canvas, left, right, top, bottom, 56f, spacing, productPaint, detailPaint, surfaceId)
+            "KUBO8042" -> {
+                var x = left
+                val w = 42f
+                while (x < right) {
+                    canvas.drawRoundRect(RectF(x, top, minOf(right, x + w), bottom), 5f, 5f, productPaint)
+                    canvas.drawRoundRect(RectF(x, top, minOf(right, x + w), bottom), 5f, 5f, darkPaint)
+                    x += w + spacing
+                }
+                val inner = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+                    color = android.graphics.Color.argb(140, 195, 200, 208)
+                    strokeWidth = 3f
+                }
+                var ix = left + 21f
+                while (ix < right) {
+                    canvas.drawLine(ix, top + 12f, ix, bottom - 12f, inner)
+                    ix += w + spacing
+                }
+            }
+            "P57_32" -> {
+                val face = when (mountingVariant) {
+                    "32 mm" -> 30f
+                    else -> 55f
+                }
+                var x = left
+                while (x < right) {
+                    canvas.drawRect(RectF(x, top, minOf(right, x + face), bottom), productPaint)
+                    canvas.drawRect(RectF(x, top, minOf(right, x + face), bottom), darkPaint)
+                    x += face + spacing
+                }
+            }
+            else -> {
+                val face = if (profileId == "P100") 62f else 70f
+                var x = left
+                while (x < right) {
+                    canvas.drawRect(RectF(x, top, minOf(right, x + face), bottom), productPaint)
+                    canvas.drawRect(RectF(x, top, minOf(right, x + face), bottom), darkPaint)
+                    x += face + spacing
+                }
             }
         }
-        canvas.drawRect(left, top, right, bottom, framePaint)
         return bmp
+    }
+
+    fun renderTechnicalPreview(config: RoksalConfig, width: Int = 1200, height: Int = 700): Bitmap {
+        val preview = renderProfilePreview(
+            profileId = config.profileId,
+            colourId = config.colourId,
+            width = width,
+            height = height,
+            surfaceId = config.surfaceId,
+            mountingVariant = config.mountingVariant,
+        )
+        return preview
+    }
+
+    private fun drawHorizontalBoards(
+        canvas: Canvas,
+        left: Float,
+        right: Float,
+        top: Float,
+        bottom: Float,
+        boardHeight: Float,
+        gap: Float,
+        productPaint: Paint,
+        detailPaint: Paint,
+        surfaceId: String,
+    ) {
+        var y = top
+        while (y < bottom) {
+            val boardBottom = minOf(bottom, y + boardHeight)
+            canvas.drawRect(RectF(left, y, right, boardBottom), productPaint)
+            if (surfaceId.contains("GOSTA", ignoreCase = true)) {
+                var ribX = left + 7f
+                while (ribX < right) {
+                    canvas.drawLine(ribX, y + 7f, ribX, boardBottom - 7f, detailPaint)
+                    ribX += 10f
+                }
+            } else if (surfaceId.contains("ŠIROKA", ignoreCase = true) || surfaceId.contains("Siroka", ignoreCase = true)) {
+                var ribX = left + 8f
+                while (ribX < right) {
+                    canvas.drawLine(ribX, y + 7f, ribX, boardBottom - 7f, detailPaint)
+                    ribX += 22f
+                }
+            }
+            y += boardHeight + gap
+        }
+    }
+
+    private fun shade(argb: Int, factor: Float): Int {
+        val a = (argb ushr 24) and 0xFF
+        val r = ((argb ushr 16) and 0xFF) * factor
+        val g = ((argb ushr 8) and 0xFF) * factor
+        val b = (argb and 0xFF) * factor
+        return android.graphics.Color.argb(a, r.toInt().coerceIn(0, 255), g.toInt().coerceIn(0, 255), b.toInt().coerceIn(0, 255))
     }
 }
