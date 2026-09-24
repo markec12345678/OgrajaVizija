@@ -159,6 +159,11 @@ fun ProductScreen(projectId: String?, onNext: () -> Unit, onBack: () -> Unit) {
                         commitEdit(false)
                     }
                 },
+                onUp = {
+                    if (tool == MaskEditor.Tool.BRUSH_ADD || tool == MaskEditor.Tool.BRUSH_ERASE) {
+                        commitEdit(true)
+                    }
+                },
                 overlay = {
                     // priročna mreža za presojo prosojnosti
                     drawRect(color = Color(0x33FFFFFF), style = androidx.compose.ui.graphics.drawscope.Fill)
