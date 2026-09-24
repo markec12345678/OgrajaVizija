@@ -90,3 +90,5 @@ jobs:
             android/app/build/outputs/androidTest-results/**
             android/app/build/reports/androidTests/**
           if-no-files-found: warn
+
+# Runtime smoke is intentionally gated behind the APK job.
