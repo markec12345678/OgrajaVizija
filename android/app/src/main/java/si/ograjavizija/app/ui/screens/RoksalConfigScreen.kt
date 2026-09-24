@@ -282,7 +282,9 @@ fun RoksalConfigScreen(
             dataProcessingConsent = dataConsent,
             termsAccepted = termsAccepted,
             newsletterOptIn = newsletterOptIn,
-            consentAtMillis = if (dataConsent || termsAccepted || newsletterOptIn) System.currentTimeMillis() else 0L,
+            consentAtMillis = if (dataConsent && termsAccepted) {
+                p0ConsentTimestamp(project?.config?.consentAtMillis)
+            } else 0L,
             notes = notes,
         )
     }
@@ -819,6 +821,8 @@ fun RoksalConfigScreen(
         }
     }
 }
+
+private fun p0ConsentTimestamp(existing: Long): Long = existing.takeIf { it > 0L } ?: System.currentTimeMillis()
 
 @Composable
 private fun ProfileCard(profile: RoksalProfile, selected: Boolean, onClick: () -> Unit) {
