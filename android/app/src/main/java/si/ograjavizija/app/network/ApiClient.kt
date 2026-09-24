@@ -68,6 +68,9 @@ object ApiClient {
     )
 
     @Serializable
+    data class InquiryStatusUpdate(val status: String)
+
+    @Serializable
     data class InquiryHealth(
         val ok: Boolean = false,
         val total: Int = 0,
@@ -113,8 +116,10 @@ object ApiClient {
         inquiryId: String,
         status: String,
     ): InquiryResponse = withContext(Dispatchers.IO) {
-        val escaped = status.replace("\\", "\\\\").replace(""", "\"")
-        val payload = """{"status":"$escaped"}"""
+        val payload = json.encodeToString(
+            InquiryStatusUpdate.serializer(),
+            InquiryStatusUpdate(status)
+        )
         val body = requestRaw(
             baseUrl = baseUrl,
             path = "/inquiries/" + inquiryId,
