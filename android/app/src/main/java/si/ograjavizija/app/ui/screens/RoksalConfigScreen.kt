@@ -91,6 +91,7 @@ fun RoksalConfigScreen(
     var height by remember { mutableFloatStateOf(1.5f) }
     var postSpacing by remember { mutableFloatStateOf(150f) }
     var supportSpacing by remember { mutableFloatStateOf(100f) }
+    var supportCountByHeight by remember { mutableStateOf("") }
     var existing by remember { mutableStateOf(RoksalStructure.NEVEM) }
     var measureStatus by remember { mutableStateOf(MeasurementStatus.OCENA) }
     var measurementMethod by remember { mutableStateOf(MeasurementMethod.ZNANE_MERE) }
@@ -158,6 +159,7 @@ fun RoksalConfigScreen(
             height = old.heightM
             postSpacing = old.postSpacingCm
             supportSpacing = old.supportSpacingCm
+            supportCountByHeight = old.supportCountByHeight
             existing = old.existingStructure
             measureStatus = old.measurementStatus
             measurementMethod = old.measurementMethod
@@ -251,6 +253,7 @@ fun RoksalConfigScreen(
             heightM = height,
             postSpacingCm = postSpacing,
             supportSpacingCm = supportSpacing,
+            supportCountByHeight = supportCountByHeight,
             gateType = if (category == RoksalCategory.OGRAJA) gateType else "BREZ",
             gateWidthM = if (gateType == "BREZ") 0f else gateWidth,
             gateHeightM = if (gateType == "BREZ") 0f else gateHeight,
@@ -544,7 +547,7 @@ fun RoksalConfigScreen(
                     singleLine = true
                 )
             }
-            if (category == RoksalCategory.OGRAJA || category == RoksalCategory.PREGRADNA_STENA) {
+            if (category == RoksalCategory.OGRAJA || category == RoksalCategory.PREGRADNA_STENA || category == RoksalCategory.FASADA || category == RoksalCategory.NAPUSC) {
                 Spacer(Modifier.height(8.dp))
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     OutlinedTextField(

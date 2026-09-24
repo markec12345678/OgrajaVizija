@@ -95,9 +95,9 @@ object RoksalCatalog {
             maxSupportCm = 100,
             maxPostVerticalCm = 150,
             hiddenFixing = true,
-            colourCount = 4,
+            colourCount = 7,
             mountingOptions = listOf("57 mm", "32 mm", "Razgibano"),
-            colourIds = listOf("AMAZON_WOOD", "ASH_WOOD", "GOLDEN_TEAK", "BURMA_TEAK"),
+            colourIds = listOf("AMAZON_WOOD", "ASH_WOOD", "GOLDEN_TEAK", "BURMA_TEAK", "OAK_WOOD", "RUSTIC_OAK", "RUSTIC_WALNUT"),
             referenceImageUrl = "https://roksal.com/wp-content/uploads/2025/07/polna-deska-57-32-300x253.jpg",
             catalogUrl = "https://roksal.com/woodcore-wpc-deske/balkonske-ograje-in-dvoriscne-ograje/wpc-ograja-pokoncna/",
             notes = "Pokončna izvedba; deska se lahko montira na 57 ali 32 mm stran ali razgibano; skrito vijačenje. Roksalove javne strani imajo glede števila barv neskladje, zato je zaloga vedno za preverjanje."
@@ -131,8 +131,8 @@ object RoksalCatalog {
             maxPostVerticalCm = 180,
             maxPostHorizontalCm = 110,
             hiddenFixing = false,
-            colourCount = 6,
-            colourIds = listOf("AMAZON_WOOD", "ASH_WOOD", "GOLDEN_TEAK", "BURMA_TEAK", "OAK_WOOD"),
+            colourCount = 7,
+            colourIds = listOf("AMAZON_WOOD", "ASH_WOOD", "GOLDEN_TEAK", "BURMA_TEAK", "OAK_WOOD", "RUSTIC_OAK", "RUSTIC_WALNUT"),
             referenceImageUrl = "https://roksal.com/wp-content/uploads/2021/12/polna-deska-nova2021-274x300.jpg",
             catalogUrl = "https://roksal.com/woodcore-wpc-deske/balkonske-ograje-in-dvoriscne-ograje/wpc-ograja-pokoncna/",
             notes = "Pokončna ali prečna izvedba; Roksal na trenutni barvni strani navaja 5 odtenkov, medtem ko druga stran navaja 6; aplikacija zato ne dodaja šestega nepreverjenega odtenka."

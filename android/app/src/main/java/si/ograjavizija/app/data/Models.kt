@@ -233,6 +233,7 @@ data class RoksalConfig(
     val heightM: Float = 1.5f,
     val postSpacingCm: Float = 150f,
     val supportSpacingCm: Float = 100f,
+    val supportCountByHeight: String = "",
     val segmentCount: Int = 1,
     val terraceWidthM: Float = 0f,
     val terraceSlopeCmPerM: Float = 1f,

@@ -45,6 +45,16 @@ private fun roksalEnquiryUrl(category: RoksalCategory): String = when (category)
 }
 
 @Composable
+private fun candidateAttachmentNote(project: Project): String? {
+    val files = listOf("original.jpg", "result.jpg")
+        .map { ProjectStore.file(project, it) }
+        .filter { it.exists() }
+    return if (files.sumOf { it.length() } > 25L * 1024L * 1024L)
+        "Skupna velikost fotografij presega 25 MB, zato jih aplikacija pri deljenju ne bo pripela. Pošlji jih Roksalu ločeno."
+    else null
+}
+
+@Composable
 fun RoksalQuoteScreen(
     projectId: String?,
     onBack: () -> Unit,
@@ -97,6 +107,7 @@ fun RoksalQuoteScreen(
             appendLine("Višina: " + (c?.heightM ?: 0f) + " m")
             appendLine("Razmak stebrov: " + (c?.postSpacingCm ?: 0f) + " cm")
             appendLine("Razmak nosilcev: " + (c?.supportSpacingCm ?: 0f) + " cm")
+            appendLine("Število nosilcev po višini: " + (c?.supportCountByHeight ?: ""))
             if (c?.category == RoksalCategory.TERASA) {
                 appendLine("Širina terase: " + (c?.terraceWidthM ?: 0f) + " m")
                 appendLine("Padec: " + (c?.terraceSlopeCmPerM ?: 0f) + " cm/m")
@@ -182,6 +193,7 @@ fun RoksalQuoteScreen(
             Spacer(Modifier.height(14.dp))
             Text(inquiry, style = MaterialTheme.typography.bodySmall)
             Spacer(Modifier.height(14.dp))
+            if (p != null && p.config?.let { it.notes.isNotBlank() } == true && false) Unit
             Text(
                 "Cena ni prikazana, ker v aplikacijo še ni vnesen dejanski Roksal cenik.",
                 color = Warn,
@@ -197,18 +209,22 @@ fun RoksalQuoteScreen(
                             project = ProjectStore.save(current.copy(status = ProjectStatus.QUOTE_REQUESTED))
                         }
                     }
-                    val imageUris = p?.let { project ->
+                    val candidateFiles = p?.let { project ->
                         listOf("original.jpg", "result.jpg")
                             .map { ProjectStore.file(project, it) }
                             .filter { it.exists() }
-                            .map { file ->
-                                FileProvider.getUriForFile(
-                                    context,
-                                    context.packageName + ".fileprovider",
-                                    file
-                                )
-                            }
                     }.orEmpty()
+                    val totalAttachmentBytes = candidateFiles.sumOf { it.length() }
+                    val attachImages = totalAttachmentBytes <= 25L * 1024L * 1024L
+                    val imageUris = if (attachImages) {
+                        candidateFiles.map { file ->
+                            FileProvider.getUriForFile(
+                                context,
+                                context.packageName + ".fileprovider",
+                                file
+                            )
+                        }
+                    } else emptyList()
 
                     val intent = if (imageUris.isNotEmpty()) {
                         Intent(Intent.ACTION_SEND_MULTIPLE).apply {
@@ -247,6 +263,13 @@ fun RoksalQuoteScreen(
                 Text("🌐 Odpri uradni Roksal obrazec")
             }
             Spacer(Modifier.height(8.dp))
+            if (p?.let { it.config != null } == true) {
+                Text(
+                    if (candidateAttachmentNote(p) == null) "" else candidateAttachmentNote(p)!!,
+                    color = Warn,
+                    style = MaterialTheme.typography.labelSmall
+                )
+            }
             Text(
                 "Roksal javni obrazec zahteva tudi potrditev obdelave podatkov in splošnih pogojev; e-novice so ločena, neobvezna izbira.",
                 color = Muted,
