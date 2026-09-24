@@ -158,7 +158,7 @@ fun ResultScreen(projectId: String?, onNewRailing: () -> Unit, onBack: () -> Uni
                                     right = size.width * mix.coerceIn(0f, 1f),
                                     bottom = size.height,
                                 ) {
-                                    drawContent()
+                                    this@drawWithContent.drawContent()
                                 }
                             },
                         contentScale = androidx.compose.ui.layout.ContentScale.Fit,
