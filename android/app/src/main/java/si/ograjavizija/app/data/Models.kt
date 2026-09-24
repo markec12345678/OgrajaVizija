@@ -215,6 +215,7 @@ data class RoksalConfig(
     val phone: String = "",
     val email: String = "",
     val invoiceAddress: String = "",
+    val address: String = "",
     val deliveryAddressDifferent: Boolean = false,
     val deliveryAddress: String = "",
     val notes: String = "",
