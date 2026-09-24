@@ -164,6 +164,47 @@ enum class PostFixing { NA_PLOSCI, BOCNO, NEVEM }
 enum class PostAppearance { OBOJE, SKRITO_ZUNAJ, NEVEM }
 
 @Serializable
+enum class TerraceBase {
+    BETON,
+    PLOSCICE,
+    HIDROIZOLACIJA,
+    PESek,
+    ZEMLJA_TRAVA,
+    NEVEM,
+}
+
+@Serializable
+enum class TerraceSubstructure {
+    WPC_LETVE,
+    ALU_CEV,
+    ALU_MREZA,
+    KOVINSKA_KONSTRUKCIJA,
+    NEVEM,
+}
+
+@Serializable
+enum class TerraceDirection {
+    V_SMER_PADCA,
+    PRAVOKOTNO_NA_PADEC,
+    NEVEM,
+}
+
+@Serializable
+enum class FacadeLayout {
+    ENOTEN,
+    MESAN,
+    NEVEM,
+}
+
+@Serializable
+enum class KuboReinforcement {
+    BREZ_DO_120,
+    ALU_20X60_DO_260,
+    PROJEKTNA_OJAČITEV,
+    NEVEM,
+}
+
+@Serializable
 enum class ProjectStatus {
     DRAFT,
     CONFIGURED,
@@ -193,6 +234,16 @@ data class RoksalConfig(
     val postSpacingCm: Float = 150f,
     val supportSpacingCm: Float = 100f,
     val segmentCount: Int = 1,
+    val terraceWidthM: Float = 0f,
+    val terraceSlopeCmPerM: Float = 1f,
+    val terraceHeightCm: Float = 5.5f,
+    val terraceBase: TerraceBase = TerraceBase.NEVEM,
+    val terraceSubstructure: TerraceSubstructure = TerraceSubstructure.NEVEM,
+    val terraceDirection: TerraceDirection = TerraceDirection.NEVEM,
+    val terraceScrewToBase: Boolean = false,
+    val facadeLayout: FacadeLayout = FacadeLayout.NEVEM,
+    val facadeOpeningNotes: String = "",
+    val kuboReinforcement: KuboReinforcement = KuboReinforcement.NEVEM,
     val gateType: String = "BREZ",
     val gateWidthM: Float = 0f,
     val gateHeightM: Float = 0f,
