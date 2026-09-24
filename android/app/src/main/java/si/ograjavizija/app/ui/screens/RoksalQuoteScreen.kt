@@ -59,6 +59,7 @@ fun RoksalQuoteScreen(
             appendLine("Profil: " + (profile?.name ?: ""))
             appendLine("Dimenzija profila: " + (profile?.dimensions ?: ""))
             appendLine("Barva: " + (c?.let { RoksalCatalog.colour(it.colourId).name } ?: ""))
+            if (!c?.surfaceId.isNullOrBlank()) appendLine("Površina: " + c?.surfaceId)
             appendLine("Razmak desk: " + (c?.boardGapMm ?: 0) + " mm")
             appendLine("Dolžina: " + (c?.lengthM ?: 0f) + " m")
             appendLine("Višina: " + (c?.heightM ?: 0f) + " m")
@@ -70,6 +71,9 @@ fun RoksalQuoteScreen(
             }
             appendLine("Konstrukcija: " + (c?.existingStructure?.name ?: "NEVEM"))
             appendLine("Status meritev: " + (c?.measurementStatus?.name ?: "OCENA"))
+            appendLine("Zgornji ročaj: " + if (c?.handleIncluded == true) "DA" else "NE")
+            appendLine("Način določitve mer: " + (c?.measurementMethod?.name ?: "ZNANE_MERE"))
+            appendLine("Dostava: " + (c?.deliveryPreference?.name ?: "NEVEM"))
             appendLine()
             appendLine("STRANKA")
             appendLine("Ime/podjetje: " + (c?.customerName ?: ""))
