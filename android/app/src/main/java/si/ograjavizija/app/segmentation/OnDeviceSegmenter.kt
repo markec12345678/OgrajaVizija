@@ -102,6 +102,54 @@ object OnDeviceSegmenter {
         }
     }
 
+    /**
+     * Samodejni način: brez ročnega tapa poskusi več smiselnih začetnih točk
+     * v območju, kjer je pri fotografiji balkona običajno ograja, nato izbere
+     * najbolj verjetno masko. Ročni tap ostane nespremenjen in je fallback.
+     */
+    fun segmentAutomatic(bmp: Bitmap): ByteArray? {
+        if (segmenter == null) return null
+        val seeds = listOf(
+            0.50f to 0.52f,
+            0.35f to 0.62f,
+            0.65f to 0.62f,
+            0.50f to 0.70f,
+        )
+        var best: ByteArray? = null
+        var bestScore = Float.NEGATIVE_INFINITY
+        for ((x, y) in seeds) {
+            val candidate = segmentAt(bmp, x, y) ?: continue
+            val score = automaticScore(candidate, bmp.width, bmp.height)
+            if (score > bestScore) {
+                bestScore = score
+                best = candidate
+            }
+        }
+        if (best == null) lastError = lastError ?: "Samodejna segmentacija ni uspela"
+        return best
+    }
+
+    private fun automaticScore(mask: ByteArray, w: Int, h: Int): Float {
+        var count = 0
+        var sumY = 0L
+        var minX = w; var maxX = -1
+        var minY = h; var maxY = -1
+        for (y in 0 until h) for (x in 0 until w) {
+            if ((mask[y * w + x].toInt() and 0xFF) <= 127) continue
+            count++; sumY += y
+            minX = minOf(minX, x); maxX = maxOf(maxX, x)
+            minY = minOf(minY, y); maxY = maxOf(maxY, y)
+        }
+        if (count == 0) return -1000f
+        val coverage = count.toFloat() / (w * h).toFloat()
+        val centerY = sumY.toFloat() / count / h
+        val width = (maxX - minX + 1).toFloat() / w
+        val coverageScore = 1f - (coverage - 0.20f).let { kotlin.math.abs(it) } / 0.35f
+        val yScore = 1f - kotlin.math.abs(centerY - 0.65f) / 0.55f
+        val widthScore = width.coerceIn(0f, 1f)
+        return coverageScore * 2f + yScore + widthScore
+    }
+
     fun release() {
         runCatching { segmenter?.close() }
         segmenter = null; modelReady = false
