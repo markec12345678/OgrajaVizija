@@ -100,7 +100,7 @@ object RoksalCatalog {
             colourIds = listOf("AMAZON_WOOD", "ASH_WOOD", "GOLDEN_TEAK", "BURMA_TEAK"),
             referenceImageUrl = "https://roksal.com/wp-content/uploads/2025/07/polna-deska-57-32-300x253.jpg",
             catalogUrl = "https://roksal.com/woodcore-wpc-deske/balkonske-ograje-in-dvoriscne-ograje/wpc-ograja-pokoncna/",
-            notes = "Pokončna izvedba; deska se lahko montira na 57 ali 32 mm stran ali razgibano; skrito vijačenje. Roksalove javne strani imajo glede števila barv neskladje, zato je zaloga vedno za preverjanje."
+            notes = "Pokončna izvedba; deska se lahko montira na 57 ali 32 mm stran ali razgibano; skrito vijačenje. Aktualna produktna stran navaja 4 odtenke, splošna barvna stran pa 3; seznam zaloge zato preveri pred oddajo."
         ),
         RoksalProfile(
             id = "P100",
@@ -109,7 +109,7 @@ object RoksalCatalog {
             faceWidthMm = 100,
             stockLengthsMm = listOf(5800),
             vertical = true,
-            horizontal = false,
+            horizontal = true,
             maxSupportCm = 80,
             maxPostVerticalCm = 180,
             hiddenFixing = false,
@@ -135,7 +135,7 @@ object RoksalCatalog {
             colourIds = listOf("AMAZON_WOOD", "ASH_WOOD", "GOLDEN_TEAK", "BURMA_TEAK", "OAK_WOOD", "RUSTIC_OAK"),
             referenceImageUrl = "https://roksal.com/wp-content/uploads/2021/12/polna-deska-nova2021-274x300.jpg",
             catalogUrl = "https://roksal.com/woodcore-wpc-deske/balkonske-ograje-in-dvoriscne-ograje/wpc-ograja-pokoncna/",
-            notes = "Pokončna ali prečna izvedba; Roksal na trenutni barvni strani navaja 5 odtenkov, medtem ko druga stran navaja 6; aplikacija zato ne dodaja šestega nepreverjenega odtenka."
+            notes = "Pokončna ali prečna izvedba. Aktualna produktna stran navaja 6 odtenkov, splošna barvna stran pa 5; seznam zaloge zato preveri pred oddajo."
         ),
         RoksalProfile(
             id = "ROMB67",
@@ -220,16 +220,19 @@ object RoksalCatalog {
     fun colour(id: String): RoksalColour = colourMap[id] ?: colours.first()
 
     fun profilesFor(category: RoksalCategory, orientation: RoksalOrientation): List<RoksalProfile> {
+        val supportsOrientation: (RoksalProfile) -> Boolean = {
+            if (orientation == RoksalOrientation.POKONCNA) it.vertical else it.horizontal
+        }
         return when (category) {
-            RoksalCategory.OGRAJA -> profiles.filter {
-                if (orientation == RoksalOrientation.POKONCNA) it.vertical else it.horizontal
-            }.filterNot { it.id == "KUBO8042" }
-            RoksalCategory.PREGRADNA_STENA -> profiles.filter {
-                if (orientation == RoksalOrientation.POKONCNA) it.vertical else it.horizontal
-            }
-            RoksalCategory.FASADA -> profiles.filter { it.id in setOf("P100", "ROMB67", "KUBO8042") }
+            RoksalCategory.OGRAJA ->
+                profiles.filter(supportsOrientation).filter { it.id in setOf("P57_32", "P100", "P128", "ROMB67", "DESKA150") }
+            RoksalCategory.PREGRADNA_STENA ->
+                profiles.filter(supportsOrientation).filter { it.id in setOf("P57_32", "P100", "P128", "ROMB67", "DESKA150", "KUBO8042") }
+            RoksalCategory.FASADA ->
+                profiles.filter { it.id in setOf("P100", "ROMB67", "KUBO8042") }.filter(supportsOrientation)
             RoksalCategory.TERASA -> profiles.filter { it.id == "DESKA150" }
-            RoksalCategory.NAPUSC -> profiles.filter { it.id == "P100" }
+            RoksalCategory.NAPUSC ->
+                profiles.filter { it.id in setOf("P100", "ROMB67", "KUBO8042") }.filter(supportsOrientation)
         }
     }
 
