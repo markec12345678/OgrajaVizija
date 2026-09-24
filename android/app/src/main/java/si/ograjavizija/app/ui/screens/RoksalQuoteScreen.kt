@@ -42,7 +42,7 @@ private fun roksalEnquiryUrl(category: RoksalCategory): String = when (category)
     RoksalCategory.TERASA -> "https://roksal.com/wpc-povprasevanje/povprasevanje-wpc-terasa/"
     RoksalCategory.FASADA -> "https://roksal.com/wpc-povprasevanje/povprasevanje-wpc-fasade/"
     RoksalCategory.PREGRADNA_STENA -> "https://roksal.com/wpc-povprasevanje/povprasevanje-pregradna-stena/"
-    RoksalCategory.NAPUSC -> "https://roksal.com/wpc-povprasevanje/"
+    RoksalCategory.NAPUSC -> "https://roksal.com/wpc-povprasevanje/povprasevanje-napusc-in-strop/"
 }
 
 private const val MAX_Roksal_ATTACHMENT_BYTES = 25L * 1024L * 1024L
@@ -240,6 +240,7 @@ fun RoksalQuoteScreen(
                     val intent = if (imageUris.isNotEmpty()) {
                         Intent(Intent.ACTION_SEND_MULTIPLE).apply {
                             type = "image/*"
+                            putExtra(Intent.EXTRA_EMAIL, arrayOf("info@roksal.com"))
                             putExtra(Intent.EXTRA_SUBJECT, "Roksal povpraševanje · " + (p?.name ?: "projekt"))
                             putExtra(Intent.EXTRA_TEXT, inquiry)
                             putParcelableArrayListExtra(Intent.EXTRA_STREAM, ArrayList<Uri>(imageUris))
@@ -248,6 +249,7 @@ fun RoksalQuoteScreen(
                     } else {
                         Intent(Intent.ACTION_SEND).apply {
                             type = "text/plain"
+                            putExtra(Intent.EXTRA_EMAIL, arrayOf("info@roksal.com"))
                             putExtra(Intent.EXTRA_SUBJECT, "Roksal povpraševanje · " + (p?.name ?: "projekt"))
                             putExtra(Intent.EXTRA_TEXT, inquiry)
                         }
@@ -256,7 +258,7 @@ fun RoksalQuoteScreen(
                 },
                 modifier = Modifier.fillMaxWidth().height(54.dp)
             ) {
-                Text("Pošlji Roksalu")
+                Text("Odpri e-pošto za Roksal")
             }
             Spacer(Modifier.height(8.dp))
             OutlinedButton(
