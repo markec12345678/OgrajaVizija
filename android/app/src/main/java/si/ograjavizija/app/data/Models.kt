@@ -24,6 +24,7 @@ data class Project(
     val placement: Placement? = null,
     val maskMeta: MaskMeta? = null,
     val config: RoksalConfig? = null,
+    val status: ProjectStatus = ProjectStatus.DRAFT,
     val variants: List<Variant> = emptyList(),
     val activeVariantId: String? = null,
     val settings: RenderSettings = RenderSettings(),
@@ -145,6 +146,27 @@ enum class RoksalStructure { NOVA, OBSTOJECA, NEVEM }
 enum class MeasurementStatus { OCENA, POTRJENO }
 
 @Serializable
+enum class MeasurementMethod { ZNANE_MERE, REFERENCA_NA_SLIKI, SEGMENTI }
+
+@Serializable
+enum class DeliveryPreference { DOSTAVA, OSEBNI_PREVZEM, NEVEM }
+
+@Serializable
+enum class ProjectStatus {
+    DRAFT,
+    CONFIGURED,
+    VISUALIZED,
+    QUOTE_REQUESTED,
+    ROKSAL_REVIEW,
+    SITE_MEASUREMENT,
+    OFFER_SENT,
+    ACCEPTED,
+    INSTALLATION,
+    COMPLETED,
+    CANCELLED,
+}
+
+@Serializable
 data class RoksalConfig(
     val category: RoksalCategory = RoksalCategory.OGRAJA,
     val orientation: RoksalOrientation = RoksalOrientation.POKONCNA,
@@ -162,6 +184,11 @@ data class RoksalConfig(
     val gateHeightM: Float = 0f,
     val existingStructure: RoksalStructure = RoksalStructure.NEVEM,
     val measurementStatus: MeasurementStatus = MeasurementStatus.OCENA,
+    val measurementMethod: MeasurementMethod = MeasurementMethod.ZNANE_MERE,
+    val referenceDimensionMm: Float = 0f,
+    val referenceLabel: String = "",
+    val segmentLengthsText: String = "",
+    val deliveryPreference: DeliveryPreference = DeliveryPreference.NEVEM,
     val customerName: String = "",
     val phone: String = "",
     val email: String = "",
