@@ -139,10 +139,10 @@ fun ResultScreen(projectId: String?, onNewRailing: () -> Unit, onBack: () -> Uni
                 val merged = remember(mix, a, b) {
                     val m = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888)
                     val cut = (w * mix).toInt().coerceIn(0, w)
-                    val pb = IntArray(w * h); b.getPixels(pb, 0, b.width, 0, 0, b.width, b.height)
-                    val pa = IntArray(w * h); a.getPixels(pa, 0, a.width, 0, 0, a.width, a.height)
+                    val pb = IntArray(w * h); b.getPixels(pb, 0, w, 0, 0, w, h)
+                    val pa = IntArray(w * h); a.getPixels(pa, 0, w, 0, 0, w, h)
                     for (y in 0 until h) for (x in 0 until w) {
-                        m.setPixel(x, y, if (x < cut) pb[y * b.width + x] else pa[y * a.width + x])
+                        m.setPixel(x, y, if (x < cut) pb[y * w + x] else pa[y * w + x])
                     }
                     m
                 }
