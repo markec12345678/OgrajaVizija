@@ -114,8 +114,12 @@ Podpora sta:
 1. sistemsko deljenje po e-pošti/drugi aplikaciji, z izbranimi fotografijami,
 2. odprtje uradnega Roksal spletnega obrazca.
 
-Neposreden CRM/API prenos ni predpostavljen, ker za to nimamo uradne
-integracijske specifikacije.
+Poleg sistemskega deljenja in uradnega obrazca je na voljo tudi lastni zaščiten
+Roksal inquiry inbox. Ko je na backendu nastavljen `OVIZ_INQUIRY_TOKEN` in je
+token v aplikaciji shranjen v Nastavitvah, aplikacija pošlje strukturiran projekt
+in do 25 MB izbranih fotografij na `POST /inquiries`. Status je mogoče nato
+spreminjati prek lastnega backend API-ja. To ni Roksalov CRM; gre za lastno
+strežniško mapo/pipeline brez zunanje integracije.
 
 ## Cene
 
@@ -141,8 +145,10 @@ DRAFT
 
 Dodatno je možen CANCELLED.
 
-Trenutni interni pregled projektov je lokalen na napravi. Za večuporabniško uporabo
-je potreben strežniški backend, avtentikacija in baza.
+Interni pregled projektov vsebuje dva vira: lokalne projekte na napravi in lastni
+Roksal inbox na backendu. Inbox uporablja bearer token in shranjuje projektne podatke
+ter priponke na disku backenda. Za večuporabniško produkcijsko okolje so še vedno
+priporočljivi obrat uporabnikov, granularne pravice in namenski podatkovni sloj.
 
 ## Android
 
@@ -156,7 +162,8 @@ je potreben strežniški backend, avtentikacija in baza.
 - neobvezen lastni FastAPI backend
 
 GitHub Actions zgradi debug in release APK ter požene JVM jedrne teste.
-Workflow uporablja tudi concurrency, da zastarele vzporedne Android build-e prekliče.
+Android workflow uporablja concurrency in timeout. Ločen backend workflow preveri
+Python compile + Roksal inquiry API smoke-test.
 
 ## Omejitve
 
