@@ -16,6 +16,8 @@ object AppState {
         private set
     var serverUrl by mutableStateOf("")
         private set
+    var inquiryToken by mutableStateOf("")
+        private set
     var lastMessage by mutableStateOf<String?>(null)
 
     fun init(ctx: Context) {
@@ -24,6 +26,7 @@ object AppState {
         if (f.exists()) runCatching {
             val s = json.decodeFromString<UiSettings>(f.readText())
             serverUrl = s.serverUrl
+            inquiryToken = s.inquiryToken
         }
     }
 
@@ -31,6 +34,11 @@ object AppState {
 
     fun updateServerUrl(url: String) {
         serverUrl = url.trim().trimEnd('/')
+        persist()
+    }
+
+    fun updateInquiryToken(token: String) {
+        inquiryToken = token.trim()
         persist()
     }
 
@@ -43,4 +51,4 @@ object AppState {
 }
 
 @kotlinx.serialization.Serializable
-data class UiSettings(val serverUrl: String = "")
+data class UiSettings(val serverUrl: String = "", val inquiryToken: String = "")
