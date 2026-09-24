@@ -68,7 +68,7 @@ object ProjectController {
         ProjectStore.writeBitmap(p, "product.jpg", preview, 95)
         ProjectStore.writeBitmap(p, "cutout.png", preview, 100)
         val ref = ImageRef("product.jpg", preview.width, preview.height)
-        ProjectStore.save(p.copy(product = ref, config = config))
+        ProjectStore.save(p.copy(product = ref, config = config, status = ProjectStatus.CONFIGURED))
     }
     suspend fun loadMask(p: Project): MaskEditor? = withContext(Dispatchers.IO) {
         val scene = ProjectStore.readBitmap(p, "original.jpg", 2000) ?: return@withContext null
