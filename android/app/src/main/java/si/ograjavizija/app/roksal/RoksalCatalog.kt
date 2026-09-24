@@ -26,7 +26,8 @@ data class RoksalProfile(
     val vertical: Boolean,
     val horizontal: Boolean,
     val maxSupportCm: Int? = null,
-    val maxPostCm: Int? = null,
+    val maxPostVerticalCm: Int? = null,
+    val maxPostHorizontalCm: Int? = null,
     val hiddenFixing: Boolean,
     val requiresAluCore: Boolean = false,
     val colourCount: Int,
@@ -79,7 +80,7 @@ object RoksalCatalog {
             vertical = true,
             horizontal = false,
             maxSupportCm = 100,
-            maxPostCm = 150,
+            maxPostVerticalCm = 150,
             hiddenFixing = true,
             colourCount = 4,
             notes = "Pokončna izvedba; deska se lahko montira na 57 ali 32 mm stran; skrito vijačenje."
@@ -93,7 +94,7 @@ object RoksalCatalog {
             vertical = true,
             horizontal = false,
             maxSupportCm = 80,
-            maxPostCm = 180,
+            maxPostVerticalCm = 180,
             hiddenFixing = false,
             colourCount = 8,
             notes = "Samo pokončna izvedba; vijaki so vidni z lica."
@@ -107,7 +108,8 @@ object RoksalCatalog {
             vertical = true,
             horizontal = true,
             maxSupportCm = 100,
-            maxPostCm = 180,
+            maxPostVerticalCm = 180,
+            maxPostHorizontalCm = 110,
             hiddenFixing = false,
             colourCount = 6,
             notes = "Pokončna ali prečna izvedba; Roksal javno navaja priporočeni razmak med deskami 0,5–3 cm."
@@ -121,7 +123,8 @@ object RoksalCatalog {
             vertical = true,
             horizontal = true,
             maxSupportCm = 110,
-            maxPostCm = 145,
+            maxPostVerticalCm = 145,
+            maxPostHorizontalCm = 145,
             hiddenFixing = true,
             requiresAluCore = true,
             colourCount = 7,
@@ -135,7 +138,7 @@ object RoksalCatalog {
             stockLengthsMm = listOf(4000, 2200),
             vertical = false,
             horizontal = true,
-            maxPostCm = 145,
+            maxPostHorizontalCm = 130,
             hiddenFixing = false,
             colourCount = 7,
             surfaceOptions = listOf("KLASIK", "RUSTIK"),
@@ -150,7 +153,7 @@ object RoksalCatalog {
             vertical = true,
             horizontal = false,
             maxSupportCm = 100,
-            maxPostCm = 200,
+            maxPostVerticalCm = 200,
             hiddenFixing = true,
             requiresAluCore = true,
             colourCount = 4,
@@ -198,8 +201,10 @@ object RoksalCatalog {
         if (p.maxSupportCm != null && c.supportSpacingCm > p.maxSupportCm)
             warnings += "Razmak nosilcev " + c.supportSpacingCm.roundToInt() + " cm presega " + p.maxSupportCm + " cm."
 
-        if (p.maxPostCm != null && c.postSpacingCm > p.maxPostCm)
-            warnings += "Razmak stebrov " + c.postSpacingCm.roundToInt() + " cm presega " + p.maxPostCm + " cm."
+        val maxPost = if (c.orientation == RoksalOrientation.POKONCNA) p.maxPostVerticalCm else p.maxPostHorizontalCm
+        val heightLimitedMax = if (c.orientation == RoksalOrientation.POKONCNA && c.heightM > 1.5f && maxPost != null) minOf(maxPost, 150) else maxPost
+        if (heightLimitedMax != null && c.postSpacingCm > heightLimitedMax)
+            warnings += "Razmak stebrov " + c.postSpacingCm.roundToInt() + " cm presega " + heightLimitedMax + " cm za izbrano izvedbo."
 
         if (p.requiresAluCore)
             warnings += "Za ta profil je aluminijasto jedro obvezno; to mora biti vključeno v izvedbo."
@@ -210,8 +215,8 @@ object RoksalCatalog {
         if (c.boardGapMm > 30)
             warnings += "Razmak večji od 3 cm presega javno navedeni priporočeni razpon; zahtevaj potrditev Roksala."
 
-        if (c.existingStructure == RoksalStructure.OBSTOJECA && p.maxPostCm != null &&
-            c.postSpacingCm > p.maxPostCm)
+        if (c.existingStructure == RoksalStructure.OBSTOJECA && heightLimitedMax != null &&
+            c.postSpacingCm > heightLimitedMax)
             warnings += "Obstoječi stebri ne ustrezajo objavljenemu maksimalnemu razmaku tega profila."
 
         return ValidationResult(warnings.none { it.startsWith("Napaka:") }, warnings)
