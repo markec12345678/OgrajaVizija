@@ -57,6 +57,13 @@ fun SceneScreen(projectId: String?, onNext: () -> Unit, onBack: () -> Unit) {
 
     val camPerm = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { ok ->
         hasCamPerm = ok
+        if (ok) {
+            val f = java.io.File(ctx.cacheDir, "camera").apply { mkdirs() }
+            val tmp = java.io.File(f, "scene_${System.currentTimeMillis()}.jpg")
+            pendingUri = androidx.core.content.FileProvider.getUriForFile(
+                ctx, ctx.packageName + ".fileprovider", tmp).toString()
+            takePic.launch(Uri.parse(pendingUri))
+        }
     }
     val takePic = rememberLauncherForActivityResult(ActivityResultContracts.TakePicture()) { ok ->
         if (ok) pendingUri?.let { u -> scope.launch { import(ctx, u) { p, b -> project = p; bmp = b } } }
@@ -90,16 +97,15 @@ fun SceneScreen(projectId: String?, onNext: () -> Unit, onBack: () -> Unit) {
                 Text("Posnemi fotografijo prostora, kamor boš postavil ograjo.", color = Muted)
                 Spacer(Modifier.height(14.dp))
                 Button(onClick = {
-                    if (!hasCamPerm) camPerm.launch(Manifest.permission.CAMERA)
-                    val p = project ?: run {
-                        val np = kotlinx.coroutines.runBlocking { ProjectController.createProject("") }
-                        np.also { project = it; AppState.setProject(it) }
+                    if (hasCamPerm) {
+                        val f = java.io.File(ctx.cacheDir, "camera").apply { mkdirs() }
+                        val tmp = java.io.File(f, "scene_${System.currentTimeMillis()}.jpg")
+                        pendingUri = androidx.core.content.FileProvider.getUriForFile(
+                            ctx, ctx.packageName + ".fileprovider", tmp).toString()
+                        takePic.launch(Uri.parse(pendingUri))
+                    } else {
+                        camPerm.launch(Manifest.permission.CAMERA)
                     }
-                    val f = java.io.File(ctx.cacheDir, "camera").apply { mkdirs() }
-                    val tmp = java.io.File(f, "scene_${System.currentTimeMillis()}.jpg")
-                    pendingUri = androidx.core.content.FileProvider.getUriForFile(
-                        ctx, ctx.packageName + ".fileprovider", tmp).toString()
-                    takePic.launch(Uri.parse(pendingUri))
                 }, modifier = Modifier.fillMaxWidth().height(56.dp)) { Text("📷 Fotografiraj balkon") }
                 Spacer(Modifier.height(8.dp))
                 OutlinedButton(onClick = { pickPic.launch("image/*") }, modifier = Modifier.fillMaxWidth()) {
