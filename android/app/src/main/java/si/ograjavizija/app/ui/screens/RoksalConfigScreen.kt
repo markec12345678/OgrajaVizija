@@ -51,6 +51,7 @@ import si.ograjavizija.app.data.RoksalPrivacy
 import si.ograjavizija.app.data.RoksalStructure
 import si.ograjavizija.app.roksal.RoksalCatalog
 import si.ograjavizija.app.roksal.RoksalProfile
+import si.ograjavizija.app.roksal.RoksalRecommendations
 import si.ograjavizija.app.ui.components.StepHeader
 import si.ograjavizija.app.ui.theme.Bad
 import si.ograjavizija.app.ui.theme.Muted
@@ -98,6 +99,7 @@ fun RoksalConfigScreen(
     var address by remember { mutableStateOf("") }
     var notes by remember { mutableStateOf("") }
     var status by remember { mutableStateOf("") }
+    var showRecommendations by remember { mutableStateOf(false) }
 
     val options = RoksalCatalog.profilesFor(category, orientation)
     val p = project
@@ -204,6 +206,42 @@ fun RoksalConfigScreen(
         Column(
             Modifier.fillMaxWidth().verticalScroll(rememberScrollState()).padding(horizontal = 12.dp)
         ) {
+            if (category != RoksalCategory.TERASA) {
+                Button(
+                    onClick = { showRecommendations = !showRecommendations },
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text(if (showRecommendations) "Skrij predloge" else "✨ Predlagaj mi konfiguracije")
+                }
+                if (showRecommendations) {
+                    RoksalRecommendations.suggest(config ?: return@Column).forEach { suggestion ->
+                        Surface(
+                            onClick = {
+                                profile = RoksalCatalog.profile(suggestion.profileId)
+                                gapMm = suggestion.gapMm.toFloat()
+                                privacy = suggestion.privacy
+                                showRecommendations = false
+                            },
+                            modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp),
+                            shape = RoundedCornerShape(14.dp),
+                            color = SurfaceAlt
+                        ) {
+                            Column(Modifier.padding(12.dp)) {
+                                Text(suggestion.title, style = MaterialTheme.typography.titleSmall)
+                                Text(
+                                    RoksalCatalog.profile(suggestion.profileId).name,
+                                    color = Muted,
+                                    style = MaterialTheme.typography.labelSmall
+                                )
+                                Text(suggestion.reason, style = MaterialTheme.typography.bodySmall)
+                                Text(suggestion.note, color = Warn, style = MaterialTheme.typography.labelSmall)
+                            }
+                        }
+                    }
+                }
+                Spacer(Modifier.height(8.dp))
+            }
+
             Text("Kaj želiš urediti?", style = MaterialTheme.typography.titleMedium)
             Spacer(Modifier.height(6.dp))
             LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
