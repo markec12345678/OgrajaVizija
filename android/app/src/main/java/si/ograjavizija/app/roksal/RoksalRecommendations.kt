@@ -15,53 +15,106 @@ data class RoksalRecommendation(
 
 object RoksalRecommendations {
     fun suggest(config: RoksalConfig): List<RoksalRecommendation> {
-        if (config.category.name == "TERASA") return emptyList()
-        val candidates = when (config.category.name) {
+        return when (config.category.name) {
             "FASADA" -> listOf(
-                RoksalRecommendation("Enoten fasadni videz", "P100", 8, RoksalPrivacy.SREDNJA, "Polna deska 100 je primerna za enoten videz fasade.", "Roksal mora potrditi podkonstrukcijo."),
-                RoksalRecommendation("Diagonalni/senčeni relief", "ROMB67", 15, RoksalPrivacy.SREDNJA, "ROMB ustvari bolj poudarjeno strukturo fasade.", "Potrebna je ustrezna podkonstrukcija in alu jedro."),
-                RoksalRecommendation("KUBO arhitektura", "KUBO8042", 10, RoksalPrivacy.ODPRTA, "KUBO omogoča 80/42 mm izvedbe in bolj odprt vzorec.", "Izbira notranje alu cevi vpliva na konstrukcijo in razpon.")
+                RoksalRecommendation(
+                    "Enoten fasadni videz", "P100", 8, RoksalPrivacy.SREDNJA,
+                    "Polna deska 100 je primerna za enoten fasadni ritem.",
+                    "Roksal mora potrditi podkonstrukcijo."
+                ),
+                RoksalRecommendation(
+                    "Poudarjen relief", "ROMB67", 15, RoksalPrivacy.SREDNJA,
+                    "ROMB ustvari bolj poudarjeno teksturo fasade.",
+                    "Potrebna je ustrezna podkonstrukcija in alu jedro."
+                ),
+                RoksalRecommendation(
+                    "KUBO arhitektura", "KUBO8042", 10, RoksalPrivacy.ODPRTA,
+                    "KUBO omogoča izrazitejši 80/42 mm profil.",
+                    "Izbira notranje alu cevi vpliva na konstrukcijo in razpon."
+                )
             )
             "NAPUSC" -> listOf(
-                RoksalRecommendation("Enoten napušč", "P100", 5, RoksalPrivacy.SREDNJA, "Polna deska 100 je aktualni Roksal profil za napušč/strop.", "Izbiro smeri in podkonstrukcije je treba uskladiti z izvedbo.")
-            )
-            else -> if (config.orientation == RoksalOrientation.POKONCNA) {
-            listOf(
                 RoksalRecommendation(
-                    "Čista zasebna ograja", "P128", 3, RoksalPrivacy.ZASEBNA,
-                    "Širša polna deska ustvari bolj zaprt videz z malo fugami.",
-                    "Dobra začetna konfiguracija za več zasebnosti."
-                ),
-                RoksalRecommendation(
-                    "Sodoben zračen videz", "ROMB67", 18, RoksalPrivacy.SREDNJA,
-                    "ROMB 67 ustvari izrazitejši vzorec in bolj zračen videz.",
-                    "Pri ROMB je alu cev v sredini obvezna."
-                ),
-                RoksalRecommendation(
-                    "Klasična ozka fuga", "P100", 8, RoksalPrivacy.SREDNJA,
-                    "Polna deska 100 je preprost pokončni sistem z vidnim vijačenjem.",
-                    "Končni razmak stebrov in konstrukcijo mora potrditi Roksal."
+                    "Enoten napušč", "P100", 5, RoksalPrivacy.SREDNJA,
+                    "Polna deska 100 je aktualni profil za napušč/strop.",
+                    "Izbiro smeri in podkonstrukcije uskladi z izvedbo."
                 )
             )
-        } else {
-            listOf(
-                RoksalRecommendation(
-                    "Zaprta vodoravna", "P128", 5, RoksalPrivacy.ZASEBNA,
-                    "Široka vodoravna deska daje miren, enoten videz.",
-                    "Preveri razmak stebrov za izbrano izvedbo."
-                ),
-                RoksalRecommendation(
-                    "Vodoravni ROMB", "ROMB67", 15, RoksalPrivacy.SREDNJA,
-                    "ROMB ustvari poudarjen horizontalni vzorec.",
-                    "Pri prečni izvedbi so potrebni ustrezni kotniki in alu jedro."
-                ),
-                RoksalRecommendation(
-                    "Široka terasa deska", "DESKA150", 8, RoksalPrivacy.SREDNJA,
-                    "DESKA 150 daje zelo malo horizontalnih linij in izrazit videz.",
-                    "Izberi površino KLASIK ali RUSTIK."
+            "PREGRADNA_STENA" -> if (config.orientation == RoksalOrientation.POKONCNA) {
+                listOf(
+                    RoksalRecommendation(
+                        "Zasebna pokončna pregrada", "P128", 3, RoksalPrivacy.ZASEBNA,
+                        "Širša polna deska ustvari bolj zaprt videz.",
+                        "Preveri razmak nosilcev in stebrov."
+                    ),
+                    RoksalRecommendation(
+                        "Pokončni ROMB", "ROMB67", 15, RoksalPrivacy.SREDNJA,
+                        "ROMB ustvari bolj zračen vzorec.",
+                        "Alu cev v sredini je obvezna."
+                    ),
+                    RoksalRecommendation(
+                        "KUBO pregrada", "KUBO8042", 10, RoksalPrivacy.ODPRTA,
+                        "KUBO omogoča bolj izrazito arhitekturno pregrado.",
+                        "Izbira notranje alu cevi vpliva na razpon."
+                    )
                 )
-            )
+            } else {
+                listOf(
+                    RoksalRecommendation(
+                        "Zaprta vodoravna", "P128", 5, RoksalPrivacy.ZASEBNA,
+                        "Široka vodoravna deska daje miren enoten videz.",
+                        "Preveri razmak stebrov."
+                    ),
+                    RoksalRecommendation(
+                        "Vodoravni ROMB", "ROMB67", 15, RoksalPrivacy.SREDNJA,
+                        "ROMB poudari horizontalni vzorec.",
+                        "Potrebni so pravilni kotniki in alu jedro."
+                    ),
+                    RoksalRecommendation(
+                        "DESKA 150", "DESKA150", 8, RoksalPrivacy.SREDNJA,
+                        "Široka deska zmanjša število vodoravnih linij.",
+                        "Izberi KLASIK ali RUSTIK."
+                    )
+                )
+            }
+            "OGRAJA" -> if (config.orientation == RoksalOrientation.POKONCNA) {
+                listOf(
+                    RoksalRecommendation(
+                        "Čista zasebna ograja", "P128", 3, RoksalPrivacy.ZASEBNA,
+                        "Širša polna deska ustvari bolj zaprt videz.",
+                        "Dobra začetna konfiguracija za zasebnost."
+                    ),
+                    RoksalRecommendation(
+                        "Sodoben zračen videz", "ROMB67", 18, RoksalPrivacy.SREDNJA,
+                        "ROMB ustvari bolj izrazit vzorec.",
+                        "Alu cev v sredini je obvezna."
+                    ),
+                    RoksalRecommendation(
+                        "Klasična ozka fuga", "P100", 8, RoksalPrivacy.SREDNJA,
+                        "Polna deska 100 je preprost pokončni sistem.",
+                        "Končne mere in konstrukcijo potrdi Roksal."
+                    )
+                )
+            } else {
+                listOf(
+                    RoksalRecommendation(
+                        "Zaprta vodoravna", "P128", 5, RoksalPrivacy.ZASEBNA,
+                        "Široka vodoravna deska daje miren enoten videz.",
+                        "Preveri razmak stebrov."
+                    ),
+                    RoksalRecommendation(
+                        "Vodoravni ROMB", "ROMB67", 15, RoksalPrivacy.SREDNJA,
+                        "ROMB poudari horizontalni vzorec.",
+                        "Potrebni so pravilni kotniki in alu jedro."
+                    ),
+                    RoksalRecommendation(
+                        "DESKA 150", "DESKA150", 8, RoksalPrivacy.SREDNJA,
+                        "Široka deska zmanjša število horizontalnih linij.",
+                        "Izberi KLASIK ali RUSTIK."
+                    )
+                )
+            }
+            else -> emptyList()
         }
-        return candidates
     }
 }
