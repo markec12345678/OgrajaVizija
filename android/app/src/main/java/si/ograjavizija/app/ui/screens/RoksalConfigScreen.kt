@@ -34,8 +34,10 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.launch
+import coil.compose.AsyncImage
 import si.ograjavizija.app.data.AppState
 import si.ograjavizija.app.data.MeasurementStatus
 import si.ograjavizija.app.data.FenceType
@@ -798,6 +800,15 @@ private fun ProfileCard(profile: RoksalProfile, selected: Boolean, onClick: () -
         modifier = Modifier.width(205.dp),
     ) {
         Column(Modifier.padding(12.dp)) {
+            if (profile.referenceImageUrl.isNotBlank()) {
+                AsyncImage(
+                    model = profile.referenceImageUrl,
+                    contentDescription = profile.name,
+                    modifier = Modifier.fillMaxWidth().height(100.dp).clip(RoundedCornerShape(10.dp)),
+                    contentScale = androidx.compose.ui.layout.ContentScale.Crop,
+                )
+                Spacer(Modifier.height(8.dp))
+            }
             Text(profile.name, style = MaterialTheme.typography.titleSmall)
             Text(profile.dimensions, color = Muted, style = MaterialTheme.typography.labelSmall)
             Text(
