@@ -77,6 +77,9 @@ fun ProductScreen(projectId: String?, onNext: () -> Unit, onBack: () -> Unit) {
         refreshCutout()
     }
 
+    val takePic = rememberLauncherForActivityResult(ActivityResultContracts.TakePicture()) { ok ->
+        if (ok) pendingUri?.let { u -> scope.launch { loadProduct(u) } }
+    }
     val camPerm = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { ok ->
         if (ok) {
             val f = java.io.File(ctx.cacheDir, "camera").apply { mkdirs() }
@@ -87,9 +90,6 @@ fun ProductScreen(projectId: String?, onNext: () -> Unit, onBack: () -> Unit) {
         } else {
             status = "⚠️ Dovoljenje za kamero je zavrnjeno."
         }
-    }
-    val takePic = rememberLauncherForActivityResult(ActivityResultContracts.TakePicture()) { ok ->
-        if (ok) pendingUri?.let { u -> scope.launch { loadProduct(u) } }
     }
     val pickPic = rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri ->
         uri?.let { scope.launch { loadProduct(it.toString()) } }
