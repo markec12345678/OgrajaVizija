@@ -433,7 +433,8 @@ private fun ProfileCard(profile: RoksalProfile, selected: Boolean, onClick: () -
                 color = Muted,
                 style = MaterialTheme.typography.labelSmall
             )
-            profile.maxPostCm?.let { Text("Stebri: ≤ " + it + " cm", color = Muted, style = MaterialTheme.typography.labelSmall) }
+            val maxPost = if (profile.vertical) profile.maxPostVerticalCm else profile.maxPostHorizontalCm
+            maxPost?.let { Text("Stebri: ≤ " + it + " cm", color = Muted, style = MaterialTheme.typography.labelSmall) }
             profile.maxSupportCm?.let { Text("Nosilci: ≤ " + it + " cm", color = Muted, style = MaterialTheme.typography.labelSmall) }
         }
     }
