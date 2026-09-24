@@ -31,6 +31,7 @@ import si.ograjavizija.app.data.AppState
 import si.ograjavizija.app.data.Project
 import si.ograjavizija.app.data.ProjectController
 import si.ograjavizija.app.data.ProjectStore
+import si.ograjavizija.app.data.MaskSource
 import si.ograjavizija.app.imaging.MaskEditor
 import si.ograjavizija.app.segmentation.OnDeviceSegmenter
 import si.ograjavizija.app.ui.components.StepHeader
@@ -53,6 +54,7 @@ fun MaskScreen(projectId: String?, onNext: () -> Unit, onBack: () -> Unit) {
     var rectStart by remember { mutableStateOf<Pair<Float, Float>?>(null) }
     var segReady by remember { mutableStateOf(false) }
     var autoBusy by remember { mutableStateOf(false) }
+    var maskSource by remember { mutableStateOf(MaskSource.MANUAL) }
     val sceneImage = remember(scene) { scene?.copy(android.graphics.Bitmap.Config.ARGB_8888, false)?.asImageBitmap() }
     val maskImage = remember(maskBmp) { maskBmp?.asImageBitmap() }
 
@@ -157,6 +159,7 @@ fun MaskScreen(projectId: String?, onNext: () -> Unit, onBack: () -> Unit) {
                             if (m != null) {
                                 e.beginStroke()
                                 e.setFromSegmentation(m, s2.width, s2.height)
+                                maskSource = MaskSource.AUTO_SEGMENT
                                 refresh()
                                 status = "🟢 Samodejna maska pripravljena — po potrebi popravi ročno."
                             } else {
@@ -175,7 +178,7 @@ fun MaskScreen(projectId: String?, onNext: () -> Unit, onBack: () -> Unit) {
                         val e = editor ?: return@Button
                         val p = project ?: return@Button
                         scope.launch {
-                            val p2 = ProjectController.saveMask(p, e)
+                            val p2 = ProjectController.saveMask(p, e, maskSource)
                             project = p2; AppState.setProject(p2)
                             onNext()
                         }
