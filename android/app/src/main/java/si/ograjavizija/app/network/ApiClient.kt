@@ -74,6 +74,58 @@ object ApiClient {
         val lastStatus: String = "",
     )
 
+    @Serializable
+    data class InquirySummary(
+        val id: String = "",
+        val receivedAt: Long = 0L,
+        val status: String = "",
+        val projectId: String = "",
+        val projectName: String = "",
+        val category: String = "",
+        val customerName: String = "",
+        val attachmentBytes: Long = 0L,
+    )
+
+    @Serializable
+    data class InquiryDetail(
+        val receivedAt: Long = 0L,
+        val status: String = "",
+        val project: Project? = null,
+        val inquiryText: String = "",
+        val attachments: List<String> = emptyList(),
+        val meta: InquirySummary? = null,
+    )
+
+    suspend fun listInquiries(baseUrl: String, token: String): List<InquirySummary> = withContext(Dispatchers.IO) {
+        val body = get(baseUrl, "/inquiries", token)
+        json.decodeFromString(body)
+    }
+
+    suspend fun getInquiry(baseUrl: String, token: String, inquiryId: String): InquiryDetail =
+        withContext(Dispatchers.IO) {
+            val body = get(baseUrl, "/inquiries/" + inquiryId, token)
+            json.decodeFromString(body)
+        }
+
+    suspend fun updateInquiryStatus(
+        baseUrl: String,
+        token: String,
+        inquiryId: String,
+        status: String,
+    ): InquiryResponse = withContext(Dispatchers.IO) {
+        val escaped = status.replace("\\", "\\\\").replace(""", "\"")
+        val payload = """{"status":"$escaped"}"""
+        val body = requestRaw(
+            baseUrl = baseUrl,
+            path = "/inquiries/" + inquiryId,
+            method = "PATCH",
+            body = payload.toByteArray(Charsets.UTF_8),
+            contentType = "application/json",
+            token = token,
+        )
+        json.decodeFromString<InquiryResponse>(body.decodeToString())
+    }
+
     suspend fun inquiryHealth(baseUrl: String, token: String): InquiryHealth = withContext(Dispatchers.IO) {
         val body = get(baseUrl, "/inquiries/health", token)
         json.decodeFromString<InquiryHealth>(body)
@@ -198,6 +250,25 @@ object ApiClient {
 
     private fun postRaw(base: String, path: String, body: ByteArray, contentType: String, token: String = ""): ByteArray {
         val c = open(base, path, "POST", token)
+        c.doOutput = true
+        c.setRequestProperty("Content-Type", contentType)
+        c.outputStream.use { it.write(body) }
+        val code = c.responseCode
+        return try {
+            if (code in 200..299) c.inputStream.readBytes()
+            else throw ServerException((c.errorStream?.readBytes()?.decodeToString() ?: "HTTP $code").take(400), code)
+        } finally { c.disconnect() }
+    }
+
+    private fun requestRaw(
+        baseUrl: String,
+        path: String,
+        method: String,
+        body: ByteArray,
+        contentType: String,
+        token: String = "",
+    ): ByteArray {
+        val c = open(baseUrl, path, method, token)
         c.doOutput = true
         c.setRequestProperty("Content-Type", contentType)
         c.outputStream.use { it.write(body) }
