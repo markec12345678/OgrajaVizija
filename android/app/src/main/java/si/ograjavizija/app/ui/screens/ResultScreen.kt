@@ -39,6 +39,7 @@ import si.ograjavizija.app.data.AppState
 import si.ograjavizija.app.data.Project
 import si.ograjavizija.app.data.ProjectController
 import si.ograjavizija.app.data.ProjectStore
+import si.ograjavizija.app.data.ProjectStatus
 import si.ograjavizija.app.data.RenderMode
 import si.ograjavizija.app.data.Variant
 import si.ograjavizija.app.ui.components.StepHeader
@@ -105,7 +106,7 @@ fun ResultScreen(projectId: String?, onNewRailing: () -> Unit, onBack: () -> Uni
             val f = ProjectStore.file(p, if (label != null) "variants/${label}.jpg" else "result.jpg")
             f.parentFile?.mkdirs()
             ProjectStore.writeBitmap(p, if (label != null) "variants/$label.jpg" else "result.jpg", r, 95)
-            var p2 = ProjectStore.save(p.copy())
+            var p2 = ProjectStore.save(p.copy(status = ProjectStatus.VISUALIZED))
             if (label != null) {
                 val v = Variant(id = label, label = label, productFileName = "product.jpg",
                     cutoutFileName = "cutout.png", resultFileName = "variants/$label.jpg", placement = p2.placement)
