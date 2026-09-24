@@ -204,7 +204,7 @@ fun RoksalConfigScreen(
         }
     }
 
-    LaunchedEffect(category) {
+    LaunchedEffect(category, profile?.id) {
         when (category) {
             RoksalCategory.TERASA -> {
                 orientation = RoksalOrientation.PRECNA
@@ -839,7 +839,7 @@ fun RoksalConfigScreen(
                     }
                 }
             ) {
-                Text(if (category == RoksalCategory.OGRAJA) "Nadaljuj: označi obstoječo ograjo →" else "Pripravi Roksal povpraševanje →")
+                Text("Nadaljuj: označi območje →")
             }
             if (status.isNotEmpty()) Text(status, color = Muted, style = MaterialTheme.typography.labelSmall)
             Spacer(Modifier.height(24.dp))
