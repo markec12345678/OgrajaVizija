@@ -16,7 +16,16 @@ data class RoksalRecommendation(
 object RoksalRecommendations {
     fun suggest(config: RoksalConfig): List<RoksalRecommendation> {
         if (config.category.name == "TERASA") return emptyList()
-        val candidates = if (config.orientation == RoksalOrientation.POKONCNA) {
+        val candidates = when (config.category.name) {
+            "FASADA" -> listOf(
+                RoksalRecommendation("Enoten fasadni videz", "P100", 8, RoksalPrivacy.SREDNJA, "Polna deska 100 je primerna za enoten videz fasade.", "Roksal mora potrditi podkonstrukcijo."),
+                RoksalRecommendation("Diagonalni/senčeni relief", "ROMB67", 15, RoksalPrivacy.SREDNJA, "ROMB ustvari bolj poudarjeno strukturo fasade.", "Potrebna je ustrezna podkonstrukcija in alu jedro."),
+                RoksalRecommendation("KUBO arhitektura", "KUBO8042", 10, RoksalPrivacy.ODPRTA, "KUBO omogoča 80/42 mm izvedbe in bolj odprt vzorec.", "Izbira notranje alu cevi vpliva na konstrukcijo in razpon.")
+            )
+            "NAPUSC" -> listOf(
+                RoksalRecommendation("Enoten napušč", "P100", 5, RoksalPrivacy.SREDNJA, "Polna deska 100 je aktualni Roksal profil za napušč/strop.", "Izbiro smeri in podkonstrukcije je treba uskladiti z izvedbo.")
+            )
+            else -> if (config.orientation == RoksalOrientation.POKONCNA) {
             listOf(
                 RoksalRecommendation(
                     "Čista zasebna ograja", "P128", 3, RoksalPrivacy.ZASEBNA,
