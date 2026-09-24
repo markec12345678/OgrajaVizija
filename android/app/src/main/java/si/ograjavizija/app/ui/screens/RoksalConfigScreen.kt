@@ -127,6 +127,11 @@ fun RoksalConfigScreen(
         }
     }
 
+    LaunchedEffect(category) {
+        if (category == RoksalCategory.TERASA) orientation = RoksalOrientation.PRECNA
+        if (category == RoksalCategory.NAPUSC) orientation = RoksalOrientation.POKONCNA
+    }
+
     LaunchedEffect(category, orientation) {
         val old = p?.config
         val requested = old?.profileId
@@ -136,6 +141,9 @@ fun RoksalConfigScreen(
     LaunchedEffect(profile?.id) {
         val colors = profile?.let { RoksalCatalog.colourOptions(it) }.orEmpty()
         if (colors.isNotEmpty() && colors.none { it.id == colourId }) colourId = colors.first().id
+        val surfaces = profile?.surfaceOptions.orEmpty()
+        if (surfaces.isNotEmpty() && surfaceId !in surfaces) surfaceId = surfaces.first()
+        if (surfaces.isEmpty()) surfaceId = ""
     }
 
     val current = profile
