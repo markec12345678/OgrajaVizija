@@ -57,6 +57,7 @@ fun ProductScreen(projectId: String?, onNext: () -> Unit, onBack: () -> Unit) {
     var tool by remember { mutableStateOf(MaskEditor.Tool.BRUSH_ADD) }
     var status by remember { mutableStateOf("") }
     var pendingUri by remember { mutableStateOf<String?>(null) }
+    val cutoutImage = remember(cutout) { cutout?.asImageBitmap() }
 
     fun refreshCutout() {
         val p = project ?: return
@@ -139,7 +140,7 @@ fun ProductScreen(projectId: String?, onNext: () -> Unit, onBack: () -> Unit) {
             }
         } else {
             ZoomPanBox(
-                image = cutout!!.asImageBitmap(),
+                image = cutoutImage!!,
                 modifier = Modifier.weight(1f),
                 onTap = { x, y ->
                     val e = editor ?: return@ZoomPanBox
