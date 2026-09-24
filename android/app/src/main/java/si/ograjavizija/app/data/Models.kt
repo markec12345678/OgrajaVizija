@@ -110,12 +110,12 @@ data class RenderSettings(
          * in spreminjanje okolice (zahteva 6, 8 in 16 iz specifikacije).
          */
         const val DEFAULT_PROMPT =
-            "Replace the existing balcony railing with the supplied reference railing. " +
-            "Preserve the exact design, material, pattern, profiles, slats and proportions " +
-            "of the reference railing - do not redesign it and do not invent new elements. " +
-            "Match the perspective, lighting, shadows, reflections and colour temperature " +
-            "to the original photograph. Keep the building, balcony, windows, walls, floor, " +
-            "sky and surroundings pixel-identical to the original. Photorealistic."
+            "Replace only the area inside the supplied mask with the supplied reference WoodCore product. " +
+            "Preserve the exact selected profile, material, colour, pattern, orientation and proportions. " +
+            "Do not redesign the product and do not invent additional elements. " +
+            "Match perspective, scale, lighting, shadows, reflections and colour temperature to the original. " +
+            "Keep every pixel outside the mask unchanged: building, windows, walls, floor, roof, vegetation, " +
+            "sky, furniture and all other surroundings. Photorealistic."
     }
 }
 
