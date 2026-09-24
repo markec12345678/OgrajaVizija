@@ -45,7 +45,7 @@ object AppState {
     private fun persist() {
         runCatching {
             File(appCtx.filesDir, "settings.json")
-                .writeText(json.encodeToString(UiSettings.serializer(), UiSettings(serverUrl = serverUrl)))
+                .writeText(json.encodeToString(UiSettings.serializer(), UiSettings(serverUrl = serverUrl, inquiryToken = inquiryToken)))
         }
     }
 }
