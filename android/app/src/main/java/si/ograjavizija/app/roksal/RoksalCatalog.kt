@@ -169,6 +169,7 @@ object RoksalCatalog {
             colourCount = 7,
             surfaceOptions = listOf("GOSTA REBRA", "ŠIROKA REBRA", "GLADKA / RUSTIK"),
             colourIds = listOf("AMAZON_WOOD", "ASH_WOOD", "GOLDEN_TEAK", "BURMA_TEAK", "OAK_WOOD", "RUSTIC_OAK", "RUSTIC_WALNUT"),
+            referenceImageUrl = "https://roksal.com/wp-content/uploads/2020/03/deska-za-terase.jpg",
             notes = "Prečna izvedba; profil 150 ima več površinskih izvedb. Za ograjo so vijaki vidni."
         ),
         RoksalProfile(
@@ -186,6 +187,7 @@ object RoksalCatalog {
             colourCount = 4,
             mountingOptions = listOf("80 mm", "42 mm", "Razgibano"),
             colourIds = listOf("AMAZON_WOOD", "OAK_WOOD", "RUSTIC_OAK", "RUSTIC_WALNUT"),
+            referenceImageUrl = "https://roksal.com/wp-content/uploads/2021/09/kubo-roksal-salon.jpg",
             notes = "Predvsem fasade/pregradne stene; notranja aluminijasta cev vpliva na konstrukcijo in razpon. 5000 mm dolžina je po Roksalu odvisna od razpoložljivosti odtenka."
         ),
     )
