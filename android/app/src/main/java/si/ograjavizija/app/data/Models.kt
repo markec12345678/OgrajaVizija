@@ -152,6 +152,15 @@ enum class MeasurementMethod { ZNANE_MERE, REFERENCA_NA_SLIKI, SEGMENTI }
 enum class DeliveryPreference { DOSTAVA, OSEBNI_PREVZEM, NEVEM }
 
 @Serializable
+enum class FenceType { BALKON, DVORISCE, NEVEM }
+
+@Serializable
+enum class PostFixing { NA_PLOSCI, BOCNO, NEVEM }
+
+@Serializable
+enum class PostAppearance { OBOJE, SKRITO_ZUNAJ, NEVEM }
+
+@Serializable
 enum class ProjectStatus {
     DRAFT,
     CONFIGURED,
@@ -173,6 +182,7 @@ data class RoksalConfig(
     val profileId: String = "P128",
     val colourId: String = "BURMA_TEAK",
     val surfaceId: String = "",
+    val mountingVariant: String = "",
     val boardGapMm: Int = 10,
     val privacy: RoksalPrivacy = RoksalPrivacy.SREDNJA,
     val lengthM: Float = 10f,
@@ -183,6 +193,10 @@ data class RoksalConfig(
     val gateType: String = "BREZ",
     val gateWidthM: Float = 0f,
     val gateHeightM: Float = 0f,
+    val cuttingRequested: Boolean = true,
+    val fenceType: FenceType = FenceType.NEVEM,
+    val postFixing: PostFixing = PostFixing.NEVEM,
+    val postAppearance: PostAppearance = PostAppearance.NEVEM,
     val handleIncluded: Boolean = true,
     val existingStructure: RoksalStructure = RoksalStructure.NEVEM,
     val measurementStatus: MeasurementStatus = MeasurementStatus.OCENA,
