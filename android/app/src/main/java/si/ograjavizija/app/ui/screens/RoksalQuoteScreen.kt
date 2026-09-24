@@ -1,6 +1,8 @@
 package si.ograjavizija.app.ui.screens
 
 import android.content.Intent
+import android.net.Uri
+import androidx.core.content.FileProvider
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -136,10 +138,33 @@ fun RoksalQuoteScreen(
                             project = ProjectStore.save(current.copy(status = ProjectStatus.QUOTE_REQUESTED))
                         }
                     }
-                    val intent = Intent(Intent.ACTION_SEND).apply {
-                        type = "text/plain"
-                        putExtra(Intent.EXTRA_SUBJECT, "Roksal povpraševanje · " + (p?.name ?: "projekt"))
-                        putExtra(Intent.EXTRA_TEXT, inquiry)
+                    val imageUris = p?.let { project ->
+                        listOf("original.jpg", "result.jpg")
+                            .map { ProjectStore.file(project, it) }
+                            .filter { it.exists() }
+                            .map { file ->
+                                FileProvider.getUriForFile(
+                                    context,
+                                    context.packageName + ".fileprovider",
+                                    file
+                                )
+                            }
+                    }.orEmpty()
+
+                    val intent = if (imageUris.isNotEmpty()) {
+                        Intent(Intent.ACTION_SEND_MULTIPLE).apply {
+                            type = "image/*"
+                            putExtra(Intent.EXTRA_SUBJECT, "Roksal povpraševanje · " + (p?.name ?: "projekt"))
+                            putExtra(Intent.EXTRA_TEXT, inquiry)
+                            putParcelableArrayListExtra(Intent.EXTRA_STREAM, ArrayList<Uri>(imageUris))
+                            addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                        }
+                    } else {
+                        Intent(Intent.ACTION_SEND).apply {
+                            type = "text/plain"
+                            putExtra(Intent.EXTRA_SUBJECT, "Roksal povpraševanje · " + (p?.name ?: "projekt"))
+                            putExtra(Intent.EXTRA_TEXT, inquiry)
+                        }
                     }
                     context.startActivity(Intent.createChooser(intent, "Pošlji povpraševanje"))
                 },
