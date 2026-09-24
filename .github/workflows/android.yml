@@ -5,9 +5,14 @@ on:
     branches: [main]
   workflow_dispatch:
 
+concurrency:
+  group: android-build-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   apk:
-    runs-on: ubuntu-latest           # 7 GB RAM — dovolj za AGP + Compose
+    runs-on: ubuntu-latest
+    timeout-minutes: 15           # 7 GB RAM — dovolj za AGP + Compose
     steps:
       - uses: actions/checkout@v5
 
