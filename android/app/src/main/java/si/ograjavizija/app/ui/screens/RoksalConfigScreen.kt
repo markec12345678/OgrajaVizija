@@ -214,7 +214,7 @@ fun RoksalConfigScreen(
                     Text(if (showRecommendations) "Skrij predloge" else "✨ Predlagaj mi konfiguracije")
                 }
                 if (showRecommendations) {
-                    RoksalRecommendations.suggest(config ?: return@Column).forEach { suggestion ->
+                    RoksalRecommendations.suggest(config ?: RoksalConfig()).filter { it.profileId in options.map { profileOption -> profileOption.id } }.forEach { suggestion ->
                         Surface(
                             onClick = {
                                 profile = RoksalCatalog.profile(suggestion.profileId)
