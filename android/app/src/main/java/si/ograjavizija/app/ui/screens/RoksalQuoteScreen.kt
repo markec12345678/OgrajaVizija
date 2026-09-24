@@ -45,7 +45,7 @@ private fun roksalEnquiryUrl(category: RoksalCategory): String = when (category)
     RoksalCategory.TERASA -> "https://roksal.com/wpc-povprasevanje/povprasevanje-wpc-terasa/"
     RoksalCategory.FASADA -> "https://roksal.com/wpc-povprasevanje/povprasevanje-wpc-fasade/"
     RoksalCategory.PREGRADNA_STENA -> "https://roksal.com/wpc-povprasevanje/povprasevanje-pregradna-stena/"
-    RoksalCategory.NAPUSC -> "https://roksal.com/wpc-povprasevanje/povprasevanje-napusc-in-strop/"
+    RoksalCategory.NAPUSC, RoksalCategory.STROP -> "https://roksal.com/wpc-povprasevanje/povprasevanje-napusc-in-strop/"
 }
 
 private const val MAX_Roksal_ATTACHMENT_BYTES = 25L * 1024L * 1024L
