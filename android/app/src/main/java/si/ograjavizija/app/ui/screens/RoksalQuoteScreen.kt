@@ -2,7 +2,6 @@ package si.ograjavizija.app.ui.screens
 
 import android.content.Intent
 import android.net.Uri
-import androidx.compose.material3.OutlinedButton
 import androidx.core.content.FileProvider
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -91,6 +90,20 @@ fun RoksalQuoteScreen(
             appendLine("Višina: " + (c?.heightM ?: 0f) + " m")
             appendLine("Razmak stebrov: " + (c?.postSpacingCm ?: 0f) + " cm")
             appendLine("Razmak nosilcev: " + (c?.supportSpacingCm ?: 0f) + " cm")
+            if (c?.category == RoksalCategory.TERASA) {
+                appendLine("Širina terase: " + (c?.terraceWidthM ?: 0f) + " m")
+                appendLine("Padec: " + (c?.terraceSlopeCmPerM ?: 0f) + " cm/m")
+                appendLine("Končna višina: " + (c?.terraceHeightCm ?: 0f) + " cm")
+                appendLine("Podlaga: " + (c?.terraceBase?.name ?: "NEVEM"))
+                appendLine("Podkonstrukcija: " + (c?.terraceSubstructure?.name ?: "NEVEM"))
+                appendLine("Smer desk: " + (c?.terraceDirection?.name ?: "NEVEM"))
+                appendLine("Vijačenje v podlago: " + if (c?.terraceScrewToBase == true) "DA" else "NE")
+            }
+            if (c?.category == RoksalCategory.FASADA) {
+                appendLine("Razpored fasade: " + (c?.facadeLayout?.name ?: "NEVEM"))
+                appendLine("Okna/vrata: " + (c?.facadeOpeningNotes ?: ""))
+                appendLine("KUBO ojačitev: " + (c?.kuboReinforcement?.name ?: "NEVEM"))
+            }
             appendLine("Vrata: " + (c?.gateType ?: "BREZ"))
             if (c?.gateType != "BREZ") {
                 appendLine("Mere vrat: " + c?.gateWidthM + " × " + c?.gateHeightM + " m")
@@ -100,6 +113,7 @@ fun RoksalQuoteScreen(
             appendLine("Zgornji ročaj: " + if (c?.handleIncluded == true) "DA" else "NE")
             appendLine("Način določitve mer: " + (c?.measurementMethod?.name ?: "ZNANE_MERE"))
             appendLine("Dostava: " + (c?.deliveryPreference?.name ?: "NEVEM"))
+            appendLine("Zahtevan razrez: " + if (c?.cuttingRequested == true) "DA" else "NE")
             appendLine("Razrez: " + if (c?.cuttingRequested == true) "DA" else "NE")
             appendLine("Tip ograje: " + (c?.fenceType?.name ?: "NEVEM"))
             appendLine("Pritrditev stebrov: " + (c?.postFixing?.name ?: "NEVEM"))
