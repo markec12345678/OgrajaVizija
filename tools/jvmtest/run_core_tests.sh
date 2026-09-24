@@ -13,12 +13,21 @@ if [ ! -d "$CACHE" ] || [ -z "$(find "$CACHE" -name 'kotlin-compiler-embeddable-
   curl -sL -o tools_jars/std.jar https://repo1.maven.org/maven2/org/jetbrains/kotlin/kotlin-stdlib/2.0.21/kotlin-stdlib-2.0.21.jar
   curl -sL -o tools_jars/cor.jar https://repo1.maven.org/maven2/org/jetbrains/kotlinx/kotlinx-coroutines-core-jvm/1.9.0/kotlinx-coroutines-core-jvm-1.9.0.jar
   curl -sL -o tools_jars/ann.jar https://repo1.maven.org/maven2/org/jetbrains/annotations/23.0.0/annotations-23.0.0.jar
+  curl -sL -o tools_jars/trove.jar https://repo1.maven.org/maven2/org/jetbrains/intellij/deps/trove4j/1.0.20200330/trove4j-1.0.20200330.jar
+  curl -sL -o tools_jars/reflect.jar https://repo1.maven.org/maven2/org/jetbrains/kotlin/kotlin-reflect/2.0.21/kotlin-reflect-2.0.21.jar
+  curl -sL -o tools_jars/script.jar https://repo1.maven.org/maven2/org/jetbrains/kotlin/kotlin-script-runtime/2.0.21/kotlin-script-runtime-2.0.21.jar
+  curl -sL -o tools_jars/daemon.jar https://repo1.maven.org/maven2/org/jetbrains/kotlin/kotlin-daemon-embeddable/2.0.21/kotlin-daemon-embeddable-2.0.21.jar
   CACHE=$(pwd)/tools_jars_flat
   mkdir -p "$CACHE/org/jetbrains/kotlin/kotlin-compiler-embeddable/2.0.21/x" "$CACHE/org/jetbrains/kotlin/kotlin-stdlib/2.0.21/x" "$CACHE/org/jetbrains/kotlinx/kotlinx-coroutines-core-jvm/1.9.0/x" "$CACHE/org/jetbrains/annotations/23.0.0/x"
   cp tools_jars/kc.jar "$CACHE/org/jetbrains/kotlin/kotlin-compiler-embeddable/2.0.21/x/kotlin-compiler-embeddable-2.0.21.jar"
   cp tools_jars/std.jar "$CACHE/org/jetbrains/kotlin/kotlin-stdlib/2.0.21/x/kotlin-stdlib-2.0.21.jar"
   cp tools_jars/cor.jar "$CACHE/org/jetbrains/kotlinx/kotlinx-coroutines-core-jvm/1.9.0/x/kotlinx-coroutines-core-jvm-1.9.0.jar"
   cp tools_jars/ann.jar "$CACHE/org/jetbrains/annotations/23.0.0/x/annotations-23.0.0.jar"
+  mkdir -p "$CACHE/org/jetbrains/intellij/deps/trove4j/1.0.20200330/x" "$CACHE/org/jetbrains/kotlin/kotlin-reflect/2.0.21/x" "$CACHE/org/jetbrains/kotlin/kotlin-script-runtime/2.0.21/x" "$CACHE/org/jetbrains/kotlin/kotlin-daemon-embeddable/2.0.21/x"
+  cp tools_jars/trove.jar "$CACHE/org/jetbrains/intellij/deps/trove4j/1.0.20200330/x/trove4j-1.0.20200330.jar"
+  cp tools_jars/reflect.jar "$CACHE/org/jetbrains/kotlin/kotlin-reflect/2.0.21/x/kotlin-reflect-2.0.21.jar"
+  cp tools_jars/script.jar "$CACHE/org/jetbrains/kotlin/kotlin-script-runtime/2.0.21/x/kotlin-script-runtime-2.0.21.jar"
+  cp tools_jars/daemon.jar "$CACHE/org/jetbrains/kotlin/kotlin-daemon-embeddable/2.0.21/x/kotlin-daemon-embeddable-2.0.21.jar"
 fi
 find_jar() { find "$CACHE" -name "$1" 2>/dev/null | head -1; }
 KC=$(find_jar "kotlin-compiler-embeddable-*.jar")
