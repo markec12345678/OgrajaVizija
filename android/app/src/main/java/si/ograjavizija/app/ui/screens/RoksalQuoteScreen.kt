@@ -2,6 +2,7 @@ package si.ograjavizija.app.ui.screens
 
 import android.content.Intent
 import android.net.Uri
+import androidx.compose.material3.OutlinedButton
 import androidx.core.content.FileProvider
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -30,10 +31,19 @@ import si.ograjavizija.app.data.AppState
 import si.ograjavizija.app.data.Project
 import si.ograjavizija.app.data.ProjectStore
 import si.ograjavizija.app.data.ProjectStatus
+import si.ograjavizija.app.data.RoksalCategory
 import si.ograjavizija.app.roksal.RoksalCatalog
 import si.ograjavizija.app.ui.components.StepHeader
 import si.ograjavizija.app.ui.theme.Muted
 import si.ograjavizija.app.ui.theme.Warn
+
+private fun roksalEnquiryUrl(category: RoksalCategory): String = when (category) {
+    RoksalCategory.OGRAJA -> "https://roksal.com/wpc-povprasevanje/povprasevanje-wpc-ograje/"
+    RoksalCategory.TERASA -> "https://roksal.com/wpc-povprasevanje/povprasevanje-wpc-terasa/"
+    RoksalCategory.FASADA -> "https://roksal.com/wpc-povprasevanje/povprasevanje-wpc-fasade/"
+    RoksalCategory.PREGRADNA_STENA -> "https://roksal.com/wpc-povprasevanje/povprasevanje-pregradna-stena/"
+    RoksalCategory.NAPUSC -> "https://roksal.com/wpc-povprasevanje/povprasevanje-napusc-in-strop/"
+}
 
 @Composable
 fun RoksalQuoteScreen(
@@ -53,6 +63,15 @@ fun RoksalQuoteScreen(
     val c = p?.config
     val profile = c?.let { RoksalCatalog.profile(it.profileId) }
     val estimate = c?.let { RoksalCatalog.estimate(it) }
+    val readyForInquiry = c?.let {
+        it.customerName.isNotBlank() &&
+            it.phone.isNotBlank() &&
+            it.email.isNotBlank() &&
+            it.invoiceAddress.isNotBlank() &&
+            it.address.isNotBlank() &&
+            it.dataProcessingConsent &&
+            it.termsAccepted
+    } == true
 
     val inquiry = remember(p, c, profile, estimate) {
         buildString {
@@ -126,6 +145,11 @@ fun RoksalQuoteScreen(
             Modifier.fillMaxWidth().verticalScroll(rememberScrollState()).padding(16.dp)
         ) {
             Text("Projekt je pripravljen", style = MaterialTheme.typography.headlineSmall)
+            Text(
+                if (readyForInquiry) "✅ Podatki za povpraševanje so izpolnjeni." else "⚠️ Pred oddajo dopolni obvezne podatke in potrdi obdelavo podatkov ter splošne pogoje.",
+                color = if (readyForInquiry) Muted else Warn,
+                style = MaterialTheme.typography.bodySmall
+            )
             Spacer(Modifier.height(8.dp))
             Text(
                 "Preveri podatke. Nato jih lahko pošlješ iz telefona po e-pošti ali v drugi aplikaciji.",
@@ -142,6 +166,7 @@ fun RoksalQuoteScreen(
             )
             Spacer(Modifier.height(10.dp))
             Button(
+                enabled = readyForInquiry,
                 onClick = {
                     val current = p
                     if (current != null) {
@@ -183,6 +208,27 @@ fun RoksalQuoteScreen(
             ) {
                 Text("Pošlji Roksalu")
             }
+            Spacer(Modifier.height(8.dp))
+            OutlinedButton(
+                onClick = {
+                    val url = roksalEnquiryUrl(c?.category ?: RoksalCategory.OGRAJA)
+                    context.startActivity(
+                        Intent.createChooser(
+                            Intent(Intent.ACTION_VIEW, Uri.parse(url)),
+                            "Odpri Roksal obrazec"
+                        )
+                    )
+                },
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text("🌐 Odpri uradni Roksal obrazec")
+            }
+            Spacer(Modifier.height(8.dp))
+            Text(
+                "Roksal javni obrazec zahteva tudi potrditev obdelave podatkov in splošnih pogojev; e-novice so ločena, neobvezna izbira.",
+                color = Muted,
+                style = MaterialTheme.typography.labelSmall
+            )
             Spacer(Modifier.height(8.dp))
             OutlinedButton(onClick = onHome, modifier = Modifier.fillMaxWidth()) {
                 Text("Nazaj na domov")
