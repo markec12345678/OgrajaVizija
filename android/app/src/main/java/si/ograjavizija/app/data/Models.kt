@@ -149,7 +149,10 @@ enum class MeasurementStatus { OCENA, POTRJENO }
 enum class MeasurementMethod { ZNANE_MERE, REFERENCA_NA_SLIKI, SEGMENTI }
 
 @Serializable
-enum class DeliveryPreference { DOSTAVA, OSEBNI_PREVZEM, NEVEM }
+enum class DeliveryPreference { DOSTAVA, DOSTAVA_IN_MONTAZA, OSEBNI_PREVZEM, NEVEM }
+
+@Serializable
+enum class CustomerType { FIZICNA_OSEBA, PODJETJE }
 
 @Serializable
 enum class FenceType { BALKON, DVORISCE, NEVEM }
@@ -205,10 +208,15 @@ data class RoksalConfig(
     val referenceLabel: String = "",
     val segmentLengthsText: String = "",
     val deliveryPreference: DeliveryPreference = DeliveryPreference.NEVEM,
+    val customerType: CustomerType = CustomerType.FIZICNA_OSEBA,
     val customerName: String = "",
+    val companyName: String = "",
+    val taxNumber: String = "",
     val phone: String = "",
     val email: String = "",
-    val address: String = "",
+    val invoiceAddress: String = "",
+    val deliveryAddressDifferent: Boolean = false,
+    val deliveryAddress: String = "",
     val notes: String = "",
 )
 
