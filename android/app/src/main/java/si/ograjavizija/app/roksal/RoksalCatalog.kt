@@ -224,10 +224,14 @@ object RoksalCatalog {
             if (orientation == RoksalOrientation.POKONCNA) it.vertical else it.horizontal
         }
         return when (category) {
-            RoksalCategory.OGRAJA ->
-                profiles.filter(supportsOrientation).filter { it.id in setOf("P57_32", "P100", "P128", "ROMB67", "DESKA150") }
-            RoksalCategory.PREGRADNA_STENA ->
-                profiles.filter(supportsOrientation).filter { it.id in setOf("P57_32", "P100", "P128", "ROMB67", "DESKA150", "KUBO8042") }
+            RoksalCategory.OGRAJA -> if (orientation == RoksalOrientation.POKONCNA)
+                profiles.filter { it.id in setOf("P57_32", "P100", "P128", "ROMB67") }
+            else
+                profiles.filter { it.id in setOf("P128", "ROMB67", "DESKA150") }
+            RoksalCategory.PREGRADNA_STENA -> if (orientation == RoksalOrientation.POKONCNA)
+                profiles.filter { it.id in setOf("P57_32", "P100", "P128", "ROMB67", "KUBO8042") }
+            else
+                profiles.filter { it.id in setOf("P128", "ROMB67", "DESKA150") }
             RoksalCategory.FASADA ->
                 profiles.filter { it.id in setOf("P100", "ROMB67", "KUBO8042") }.filter(supportsOrientation)
             RoksalCategory.TERASA -> profiles.filter { it.id == "DESKA150" }
