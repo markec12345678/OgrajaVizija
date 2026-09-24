@@ -8,7 +8,8 @@ import androidx.compose.runtime.remember
 import si.ograjavizija.app.ui.screens.HomeScreen
 import si.ograjavizija.app.ui.screens.MaskScreen
 import si.ograjavizija.app.ui.screens.PlaceScreen
-import si.ograjavizija.app.ui.screens.ProductScreen
+import si.ograjavizija.app.ui.screens.RoksalConfigScreen
+import si.ograjavizija.app.ui.screens.RoksalQuoteScreen
 import si.ograjavizija.app.ui.screens.ResultScreen
 import si.ograjavizija.app.ui.screens.SceneScreen
 import si.ograjavizija.app.ui.screens.SettingsScreen
@@ -23,10 +24,10 @@ import si.ograjavizija.app.ui.screens.SettingsScreen
  *  5 ✨ Ustvari vizualizacijo -> ResultScreen
  *  6 💾 Shrani                -> v ResultScreen
  */
-enum class Route { HOME, SCENE, PRODUCT, MASK, PLACE, RESULT, SETTINGS }
+enum class Route { HOME, SCENE, PRODUCT, MASK, PLACE, RESULT, QUOTE, DIRECT_QUOTE, SETTINGS }
 
 val STEP_LABELS = listOf(
-    "1 📷 Balkon", "2 📷 Ograja", "3 ✏️ Označi", "4 📐 Položaj", "5 ✨ Rezultat", "6 💾 Shrani",
+    "1 📷 Prostor", "2 🧰 Roksal", "3 ✏️ Označi", "4 📐 Položaj", "5 ✨ Rezultat", "6 📩 Povpraš",
 )
 
 @Composable
@@ -41,13 +42,30 @@ fun AppNav() {
             onSettings = { route = Route.SETTINGS },
         )
         Route.SCENE -> SceneScreen(projectId = openProjectId, onNext = { route = Route.PRODUCT }, onBack = { route = Route.HOME })
-        Route.PRODUCT -> ProductScreen(projectId = openProjectId, onNext = { route = Route.MASK }, onBack = { route = Route.SCENE })
+        Route.PRODUCT -> RoksalConfigScreen(
+            projectId = openProjectId,
+            onContinue = { category ->
+                route = if (category == si.ograjavizija.app.data.RoksalCategory.OGRAJA) Route.MASK else Route.DIRECT_QUOTE
+            },
+            onBack = { route = Route.SCENE },
+        )
         Route.MASK -> MaskScreen(projectId = openProjectId, onNext = { route = Route.PLACE }, onBack = { route = Route.PRODUCT })
         Route.PLACE -> PlaceScreen(projectId = openProjectId, onNext = { route = Route.RESULT }, onBack = { route = Route.MASK })
         Route.RESULT -> ResultScreen(
             projectId = openProjectId,
             onNewRailing = { route = Route.PRODUCT },
             onBack = { route = Route.PLACE },
+            onHome = { route = Route.HOME },
+            onQuote = { route = Route.QUOTE },
+        )
+        Route.QUOTE -> RoksalQuoteScreen(
+            projectId = openProjectId,
+            onBack = { route = Route.RESULT },
+            onHome = { route = Route.HOME },
+        )
+        Route.DIRECT_QUOTE -> RoksalQuoteScreen(
+            projectId = openProjectId,
+            onBack = { route = Route.PRODUCT },
             onHome = { route = Route.HOME },
         )
         Route.SETTINGS -> SettingsScreen(onBack = { route = Route.HOME })
