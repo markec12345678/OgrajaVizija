@@ -101,7 +101,7 @@ fun ProductScreen(projectId: String?, onNext: () -> Unit, onBack: () -> Unit) {
         if (p?.product != null) refreshCutout()
     }
 
-    fun commitEdit() {
+    fun commitEdit(persist: Boolean = true) {
         val e = editor ?: return
         val p = project ?: return
         overlayBmp = e.toBitmap()
@@ -119,7 +119,7 @@ fun ProductScreen(projectId: String?, onNext: () -> Unit, onBack: () -> Unit) {
         val nb = android.graphics.Bitmap.createBitmap(w, h, android.graphics.Bitmap.Config.ARGB_8888)
         nb.setPixels(px, 0, w, 0, 0, w, h)
         cutout = nb
-        scope.launch { ProjectStore.writeBitmap(p, "cutout.png", nb) }
+        if (persist) scope.launch { ProjectStore.writeBitmap(p, "cutout.png", nb) }
     }
 
     Column(Modifier.fillMaxSize()) {
@@ -156,7 +156,7 @@ fun ProductScreen(projectId: String?, onNext: () -> Unit, onBack: () -> Unit) {
                     val e = editor ?: return@ZoomPanBox
                     if (tool == MaskEditor.Tool.BRUSH_ADD || tool == MaskEditor.Tool.BRUSH_ERASE) {
                         e.stamp(x, y, brush, tool == MaskEditor.Tool.BRUSH_ADD)
-                        commitEdit()
+                        commitEdit(false)
                     }
                 },
                 overlay = {
