@@ -131,7 +131,7 @@ enum class AiProvider {
 }
 
 @Serializable
-enum class RoksalCategory { OGRAJA, PREGRADNA_STENA, TERASA, FASADA, NAPUSC }
+enum class RoksalCategory { OGRAJA, PREGRADNA_STENA, TERASA, FASADA, NAPUSC, STROP }
 
 @Serializable
 enum class RoksalOrientation { POKONCNA, PRECNA }
