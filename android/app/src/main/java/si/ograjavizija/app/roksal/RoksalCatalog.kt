@@ -34,6 +34,8 @@ data class RoksalProfile(
     val surfaceOptions: List<String> = emptyList(),
     val mountingOptions: List<String> = emptyList(),
     val colourIds: List<String> = emptyList(),
+    val referenceImageUrl: String = "",
+    val catalogUrl: String = "https://roksal.com/woodcore-wpc-deske/",
     val notes: String,
 )
 
@@ -96,6 +98,8 @@ object RoksalCatalog {
             colourCount = 4,
             mountingOptions = listOf("57 mm", "32 mm", "Razgibano"),
             colourIds = listOf("AMAZON_WOOD", "ASH_WOOD", "GOLDEN_TEAK", "BURMA_TEAK"),
+            referenceImageUrl = "https://roksal.com/wp-content/uploads/2025/07/polna-deska-57-32-300x253.jpg",
+            catalogUrl = "https://roksal.com/woodcore-wpc-deske/balkonske-ograje-in-dvoriscne-ograje/wpc-ograja-pokoncna/",
             notes = "Pokončna izvedba; deska se lahko montira na 57 ali 32 mm stran ali razgibano; skrito vijačenje. Roksalove javne strani imajo glede števila barv neskladje, zato je zaloga vedno za preverjanje."
         ),
         RoksalProfile(
@@ -111,6 +115,8 @@ object RoksalCatalog {
             hiddenFixing = false,
             colourCount = 8,
             colourIds = listOf("AMAZON_WOOD", "ASH_WOOD", "GOLDEN_TEAK", "BURMA_TEAK", "OAK_WOOD", "WHITE", "RUSTIC_OAK", "RUSTIC_WALNUT"),
+            referenceImageUrl = "https://roksal.com/wp-content/uploads/2020/03/ograja-pokoncna.jpg",
+            catalogUrl = "https://roksal.com/woodcore-wpc-deske/balkonske-ograje-in-dvoriscne-ograje/wpc-ograja-pokoncna/",
             notes = "Pokončna; vijaki so vidni z lica. Bela je na Roksalovem obrazcu označena kot možnost samo za polno desko 10 cm."
         ),
         RoksalProfile(
@@ -127,6 +133,8 @@ object RoksalCatalog {
             hiddenFixing = false,
             colourCount = 6,
             colourIds = listOf("AMAZON_WOOD", "ASH_WOOD", "GOLDEN_TEAK", "BURMA_TEAK", "OAK_WOOD"),
+            referenceImageUrl = "https://roksal.com/wp-content/uploads/2021/12/polna-deska-nova2021-274x300.jpg",
+            catalogUrl = "https://roksal.com/woodcore-wpc-deske/balkonske-ograje-in-dvoriscne-ograje/wpc-ograja-pokoncna/",
             notes = "Pokončna ali prečna izvedba; Roksal na trenutni barvni strani navaja 5 odtenkov, medtem ko druga stran navaja 6; aplikacija zato ne dodaja šestega nepreverjenega odtenka."
         ),
         RoksalProfile(
@@ -144,6 +152,8 @@ object RoksalCatalog {
             requiresAluCore = true,
             colourCount = 7,
             colourIds = listOf("AMAZON_WOOD", "ASH_WOOD", "GOLDEN_TEAK", "BURMA_TEAK", "OAK_WOOD", "RUSTIC_OAK", "RUSTIC_WALNUT"),
+            referenceImageUrl = "https://roksal.com/wp-content/uploads/2021/12/romb-woodcore-wpc-300x229.jpg",
+            catalogUrl = "https://roksal.com/woodcore-wpc-deske/balkonske-ograje-in-dvoriscne-ograje/wpc-ograja-pokoncna/",
             notes = "Pri ograji je aluminijasta cev v sredini obvezna; skrito vijačenje. Brez alu cevi montaža ni mogoča."
         ),
         RoksalProfile(
@@ -154,10 +164,10 @@ object RoksalCatalog {
             stockLengthsMm = listOf(4000, 2200),
             vertical = false,
             horizontal = true,
-            maxPostHorizontalCm = 130,
+            maxPostHorizontalCm = 140,
             hiddenFixing = false,
             colourCount = 7,
-            surfaceOptions = listOf("KLASIK", "RUSTIK"),
+            surfaceOptions = listOf("GOSTA REBRA", "ŠIROKA REBRA", "GLADKA / RUSTIK"),
             colourIds = listOf("AMAZON_WOOD", "ASH_WOOD", "GOLDEN_TEAK", "BURMA_TEAK", "OAK_WOOD", "RUSTIC_OAK", "RUSTIC_WALNUT"),
             notes = "Prečna izvedba; profil 150 ima več površinskih izvedb. Za ograjo so vijaki vidni."
         ),
