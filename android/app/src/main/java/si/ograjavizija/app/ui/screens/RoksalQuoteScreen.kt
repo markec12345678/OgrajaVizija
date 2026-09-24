@@ -2,6 +2,9 @@ package si.ograjavizija.app.ui.screens
 
 import android.content.Intent
 import android.net.Uri
+import android.content.ClipData
+import android.content.ClipboardManager
+import android.content.Context
 import androidx.core.content.FileProvider
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -72,6 +75,7 @@ fun RoksalQuoteScreen(
     val c = p?.config
     val profile = c?.let { RoksalCatalog.profile(it.profileId) }
     val estimate = c?.let { RoksalCatalog.estimate(it) }
+    val attachmentNote = p?.let { candidateAttachmentNote(it) }
     val readyForInquiry = c?.let {
         it.customerName.isNotBlank() &&
             it.phone.isNotBlank() &&
@@ -193,13 +197,23 @@ fun RoksalQuoteScreen(
             Spacer(Modifier.height(14.dp))
             Text(inquiry, style = MaterialTheme.typography.bodySmall)
             Spacer(Modifier.height(14.dp))
-            if (p != null && p.config?.let { it.notes.isNotBlank() } == true && false) Unit
             Text(
                 "Cena ni prikazana, ker v aplikacijo še ni vnesen dejanski Roksal cenik.",
                 color = Warn,
                 style = MaterialTheme.typography.labelSmall
             )
             Spacer(Modifier.height(10.dp))
+            OutlinedButton(
+                enabled = inquiry.isNotBlank(),
+                onClick = {
+                    val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+                    clipboard.setPrimaryClip(ClipData.newPlainText("Roksal povpraševanje", inquiry))
+                },
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text("📋 Kopiraj povpraševanje")
+            }
+            Spacer(Modifier.height(8.dp))
             Button(
                 enabled = readyForInquiry,
                 onClick = {
@@ -263,12 +277,8 @@ fun RoksalQuoteScreen(
                 Text("🌐 Odpri uradni Roksal obrazec")
             }
             Spacer(Modifier.height(8.dp))
-            if (p?.let { it.config != null } == true) {
-                Text(
-                    if (candidateAttachmentNote(p) == null) "" else candidateAttachmentNote(p)!!,
-                    color = Warn,
-                    style = MaterialTheme.typography.labelSmall
-                )
+            attachmentNote?.let {
+                Text(it, color = Warn, style = MaterialTheme.typography.labelSmall)
             }
             Text(
                 "Roksal javni obrazec zahteva tudi potrditev obdelave podatkov in splošnih pogojev; e-novice so ločena, neobvezna izbira.",

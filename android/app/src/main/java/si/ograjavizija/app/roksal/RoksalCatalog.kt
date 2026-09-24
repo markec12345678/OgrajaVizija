@@ -200,7 +200,13 @@ object RoksalCatalog {
         RoksalComponent("TERRACE_ALU", "Alu podložna cev", "kos", "Dolžina 6 m; višina je odvisna od izvedbe."),
         RoksalComponent("TERRACE_TRIM", "Zaključna letev 45 × 55 mm", "kos", "Na voljo v več standardnih dolžinah."),
         RoksalComponent("TERRACE_CLIP", "Začetni distančnik / distančnik", "kos", "Za pravilne dilatacije in montažo."),
+        RoksalComponent("TERRACE_GRID", "Alu mreža za podkonstrukcijo", "kos", "Za pripravljeno stabilno podlago, kadar je predvidena mrežna rešitev."),
+        RoksalComponent("TERRACE_RUBBER", "Gumijasta podloga", "kos", "Za hidroizolacijo brez vijačenja v podlago."),
         RoksalComponent("FACADE_CLIP", "Fasadni klip", "kos", "Za pritrditev določenih fasadnih WoodCore profilov."),
+        RoksalComponent("KUBO_CORE", "Notranja aluminijasta cev KUBO", "tekoči m", "Profil KUBO zahteva ustrezno notranjo alu/RF rešitev glede na izvedbo in razpon."),
+        RoksalComponent("KUBO_20X60", "Aluminijasta cev 20 × 60 × 2 mm", "tekoči m", "Za KUBO razpone nad 120 cm do 260 cm."),
+        RoksalComponent("KUBO_25X25", "Aluminijasta cev 25 × 25 × 2 mm", "tekoči m", "Alternativna notranja cev KUBO glede na način montaže."),
+        RoksalComponent("KUBO_20X20", "Aluminijasta cev 20 × 20 × 2 mm", "tekoči m", "Alternativna notranja cev KUBO glede na način montaže."),
     )
 
     private val profileMap = profiles.associateBy { it.id }
@@ -404,9 +410,11 @@ object RoksalCatalog {
 
     fun componentsFor(c: RoksalConfig): List<RoksalComponent> {
         val out = mutableListOf<RoksalComponent>()
+
         if (c.category == RoksalCategory.OGRAJA && c.handleIncluded) {
             out += components.first { it.id == "HANDLE_92" }
         }
+
         if (c.category != RoksalCategory.TERASA && c.category != RoksalCategory.FASADA) {
             out += components.first { it.id == "RF_SCREW" }
         }
@@ -419,19 +427,42 @@ object RoksalCatalog {
             }
         }
 
+        if (c.profileId == "KUBO8042") {
+            out += components.first { it.id == "KUBO_CORE" }
+            when (c.kuboReinforcement) {
+                si.ograjavizija.app.data.KuboReinforcement.ALU_20X60_DO_260 ->
+                    out += components.first { it.id == "KUBO_20X60" }
+                si.ograjavizija.app.data.KuboReinforcement.PROJEKTNA_OJACITEV ->
+                    out += components.first { it.id == "KUBO_20X60" }
+                else -> Unit
+            }
+        }
+
         when (c.category) {
             RoksalCategory.TERASA -> {
                 out += components.first { it.id == "TERRACE_INOX_SCREW" }
-                out += components.first { it.id == "TERRACE_SUB" }
-                out += components.first { it.id == "TERRACE_ALU" }
+                when (c.terraceSubstructure) {
+                    si.ograjavizija.app.data.TerraceSubstructure.WPC_LETVE ->
+                        out += components.first { it.id == "TERRACE_SUB" }
+                    si.ograjavizija.app.data.TerraceSubstructure.ALU_CEV ->
+                        out += components.first { it.id == "TERRACE_ALU" }
+                    si.ograjavizija.app.data.TerraceSubstructure.ALU_MREZA ->
+                        out += components.first { it.id == "TERRACE_GRID" }
+                    else -> Unit
+                }
                 out += components.first { it.id == "TERRACE_TRIM" }
                 out += components.first { it.id == "TERRACE_CLIP" }
+                if (c.terraceBase == si.ograjavizija.app.data.TerraceBase.HIDROIZOLACIJA &&
+                    !c.terraceScrewToBase) {
+                    out += components.first { it.id == "TERRACE_RUBBER" }
+                }
             }
             RoksalCategory.FASADA -> {
                 out += components.first { it.id == "FACADE_CLIP" }
             }
             else -> Unit
         }
+
         return out.distinctBy { it.id }
     }
 
