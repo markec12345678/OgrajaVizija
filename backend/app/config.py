@@ -27,6 +27,10 @@ class Settings:
     diffusion_strength: float = float(os.getenv("OVIZ_STRENGTH", "0.35"))
     max_work_edge: int = int(os.getenv("OVIZ_MAX_EDGE", "1600"))
 
+    # Roksal inquiry inbox: privzeto izklopljen; odklene ga eksplicitni bearer token.
+    inquiry_token: str = os.getenv("OVIZ_INQUIRY_TOKEN", "")
+    inquiry_max_bytes: int = int(os.getenv("OVIZ_INQUIRY_MAX_BYTES", str(25 * 1024 * 1024)))
+
     # 🔴 samo ce ZELIS zunanji API (nikoli privzeto)
     replicate_api_token: str = os.getenv("REPLICATE_API_TOKEN", "")
     fal_key: str = os.getenv("FAL_KEY", "")

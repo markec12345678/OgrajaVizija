@@ -10,15 +10,16 @@ AI je opcija prek providerjev; brez GPU-ja delujeta 🟢 GEOMETRY in 🟢 LAMA(T
 """
 from __future__ import annotations
 
+import hmac
 import json
 import os
 import time
 import uuid
 
 import numpy as np
-from fastapi import FastAPI, File, Form, HTTPException, UploadFile
+from fastapi import FastAPI, File, Form, Header, HTTPException, Request, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import Response
+from fastapi.responses import FileResponse, Response
 
 from .config import settings
 from .providers.base import FinalizeRequest
@@ -220,3 +221,240 @@ async def finalize(
 @app.get("/")
 def root():
     return {"app": "OgrajaVizija backend", "docs": "/docs", "health": "/health"}
+
+# ---------------------------------------------------------------------------
+# Roksal inquiry inbox — explicit bearer-token protected storage.
+# The endpoint is disabled unless OVIZ_INQUIRY_TOKEN is configured.
+# ---------------------------------------------------------------------------
+
+INQUIRY_STATUSES = {
+    "NEW",
+    "ROKSAL_REVIEW",
+    "SITE_MEASUREMENT",
+    "OFFER_SENT",
+    "ACCEPTED",
+    "INSTALLATION",
+    "COMPLETED",
+    "CANCELLED",
+}
+
+
+def _require_inquiry_auth(authorization: str) -> None:
+    expected = settings.inquiry_token.strip()
+    if not expected:
+        raise HTTPException(503, "Roksal inquiry inbox ni konfiguriran.")
+    scheme, _, provided = authorization.partition(" ")
+    if scheme.lower() != "bearer" or not provided.strip() or not hmac.compare_digest(provided.strip(), expected):
+        raise HTTPException(401, "Neveljaven ali manjkajoč bearer token.")
+
+
+def _inquiry_root() -> str:
+    path = os.path.join(settings.data_dir, "inquiries")
+    os.makedirs(path, exist_ok=True)
+    return path
+
+
+def _inquiry_dir(inquiry_id: str) -> str:
+    import re
+    if not re.fullmatch(r"inq_[0-9a-f]{32}", inquiry_id):
+        raise HTTPException(400, "Neveljaven ID povpraševanja.")
+    return os.path.join(_inquiry_root(), inquiry_id)
+
+
+async def _save_inquiry_upload(upload: UploadFile | None, path: str, current_total: int) -> int:
+    if upload is None or not upload.filename:
+        return current_total
+    allowed = {".jpg", ".jpeg", ".png", ".webp"}
+    ext = os.path.splitext(upload.filename or "")[1].lower()
+    if ext not in allowed:
+        raise HTTPException(400, f"Nepodprta pripona datoteke: {ext or 'brez'}")
+    os.makedirs(os.path.dirname(path), exist_ok=True)
+    total = current_total
+    with open(path, "wb") as out:
+        while True:
+            chunk = await upload.read(1024 * 1024)
+            if not chunk:
+                break
+            total += len(chunk)
+            if total > settings.inquiry_max_bytes:
+                out.close()
+                try:
+                    os.remove(path)
+                except FileNotFoundError:
+                    pass
+                raise HTTPException(413, "Skupna velikost priponk presega dovoljeno omejitev 25 MB.")
+            out.write(chunk)
+    return total
+
+
+@app.post("/inquiries")
+async def create_inquiry(
+    payload: str = Form("{}"),
+    original: UploadFile | None = File(None),
+    result: UploadFile | None = File(None),
+    product: UploadFile | None = File(None),
+    authorization: str = Header(""),
+):
+    _require_inquiry_auth(authorization)
+    try:
+        data = json.loads(payload)
+    except json.JSONDecodeError as exc:
+        raise HTTPException(400, f"Neveljaven JSON payload: {exc.msg}") from exc
+
+    project = data.get("project")
+    if len(payload.encode("utf-8")) > settings.inquiry_max_bytes:
+        raise HTTPException(413, "Payload presega dovoljeno omejitev 25 MB.")
+    if not isinstance(project, dict) or not project.get("id"):
+        raise HTTPException(400, "Payload ne vsebuje veljavnega projekta.")
+    inquiry_id = "inq_" + uuid.uuid4().hex
+    received_at = int(time.time() * 1000)
+    directory = os.path.join(_inquiry_root(), inquiry_id)
+    os.makedirs(directory, exist_ok=False)
+    meta = {
+        "id": inquiry_id,
+        "receivedAt": received_at,
+        "status": "NEW",
+        "projectId": str(project.get("id", "")),
+        "projectName": str(project.get("name", "")),
+        "category": str((project.get("config") or {}).get("category", "")),
+        "customerName": str((project.get("config") or {}).get("customerName", "")),
+    }
+    total = 0
+    try:
+        with open(os.path.join(directory, "payload.json"), "w", encoding="utf-8") as out:
+            json.dump({
+                "receivedAt": received_at,
+                "status": "NEW",
+                "project": project,
+                "inquiryText": str(data.get("inquiryText", "")),
+            }, out, ensure_ascii=False, indent=2)
+        for upload in (original, result, product):
+            if upload is not None and upload.filename:
+                safe_name = {"original": "original", "result": "result", "product": "product"}.get(
+                    os.path.splitext(upload.filename)[0].lower()
+                )
+                if safe_name:
+                    total = await _save_inquiry_upload(
+                        upload,
+                        os.path.join(directory, safe_name + os.path.splitext(upload.filename)[1].lower()),
+                        total,
+                    )
+        meta["attachmentBytes"] = total
+        with open(os.path.join(directory, "meta.json"), "w", encoding="utf-8") as out:
+            json.dump(meta, out, ensure_ascii=False, indent=2)
+    except Exception:
+        import shutil
+        shutil.rmtree(directory, ignore_errors=True)
+        raise
+
+    return {
+        "ok": True,
+        "inquiryId": inquiry_id,
+        "status": "NEW",
+        "receivedAt": received_at,
+        "message": "Povpraševanje je shranjeno v lokalni Roksal inbox.",
+    }
+
+
+@app.get("/inquiries/health")
+def inquiry_health(authorization: str = Header("")):
+    _require_inquiry_auth(authorization)
+    root = _inquiry_root()
+    records = []
+    for entry in os.listdir(root):
+        meta_path = os.path.join(root, entry, "meta.json")
+        if os.path.isfile(meta_path):
+            try:
+                records.append(json.load(open(meta_path, encoding="utf-8")))
+            except Exception:
+                continue
+    records.sort(key=lambda x: x.get("receivedAt", 0), reverse=True)
+    return {
+        "ok": True,
+        "total": len(records),
+        "lastStatus": records[0].get("status", "") if records else "",
+    }
+
+
+@app.get("/inquiries")
+def list_inquiries(authorization: str = Header("")):
+    _require_inquiry_auth(authorization)
+    root = _inquiry_root()
+    out = []
+    for entry in os.listdir(root):
+        meta_path = os.path.join(root, entry, "meta.json")
+        if not os.path.isfile(meta_path):
+            continue
+        try:
+            out.append(json.load(open(meta_path, encoding="utf-8")))
+        except Exception:
+            pass
+    return sorted(out, key=lambda x: x.get("receivedAt", 0), reverse=True)
+
+
+@app.get("/inquiries/{inquiry_id}")
+def get_inquiry(inquiry_id: str, authorization: str = Header("")):
+    _require_inquiry_auth(authorization)
+    directory = _inquiry_dir(inquiry_id)
+    payload_path = os.path.join(directory, "payload.json")
+    if not os.path.isfile(payload_path):
+        raise HTTPException(404, "Povpraševanje ne obstaja.")
+    with open(payload_path, encoding="utf-8") as fh:
+        payload = json.load(fh)
+    meta_path = os.path.join(directory, "meta.json")
+    with open(meta_path, encoding="utf-8") as fh:
+        meta = json.load(fh)
+    payload["meta"] = meta
+    payload["attachments"] = sorted(
+        name for name in os.listdir(directory) if name not in {"payload.json", "meta.json"}
+    )
+    return payload
+
+
+@app.get("/inquiries/{inquiry_id}/files/{filename}")
+def get_inquiry_file(
+    inquiry_id: str,
+    filename: str,
+    authorization: str = Header(""),
+):
+    _require_inquiry_auth(authorization)
+    allowed = {"original.jpg", "original.jpeg", "original.png", "original.webp",
+               "result.jpg", "result.jpeg", "result.png", "result.webp",
+               "product.jpg", "product.jpeg", "product.png", "product.webp"}
+    safe_name = os.path.basename(filename).lower()
+    if safe_name not in allowed:
+        raise HTTPException(400, "Nepodprta priponka.")
+    path = os.path.join(_inquiry_dir(inquiry_id), safe_name)
+    if not os.path.isfile(path):
+        raise HTTPException(404, "Priponka ne obstaja.")
+    return FileResponse(path)
+
+
+@app.patch("/inquiries/{inquiry_id}")
+async def update_inquiry(
+    inquiry_id: str,
+    request: Request,
+    authorization: str = Header(""),
+):
+    _require_inquiry_auth(authorization)
+    directory = _inquiry_dir(inquiry_id)
+    meta_path = os.path.join(directory, "meta.json")
+    if not os.path.isfile(meta_path):
+        raise HTTPException(404, "Povpraševanje ne obstaja.")
+    body = await request.json()
+    status = str(body.get("status", "")).strip()
+    if status not in INQUIRY_STATUSES:
+        raise HTTPException(400, "Neveljaven status.")
+    with open(meta_path, encoding="utf-8") as fh:
+        meta = json.load(fh)
+    meta["status"] = status
+    with open(meta_path, "w", encoding="utf-8") as fh:
+        json.dump(meta, fh, ensure_ascii=False, indent=2)
+    payload_path = os.path.join(directory, "payload.json")
+    if os.path.isfile(payload_path):
+        with open(payload_path, encoding="utf-8") as fh:
+            payload = json.load(fh)
+        payload["status"] = status
+        with open(payload_path, "w", encoding="utf-8") as fh:
+            json.dump(payload, fh, ensure_ascii=False, indent=2)
+    return {"ok": True, "inquiryId": inquiry_id, "status": status}
