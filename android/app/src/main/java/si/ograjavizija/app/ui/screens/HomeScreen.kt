@@ -61,8 +61,9 @@ fun HomeScreen(onNew: (String) -> Unit, onOpen: (String) -> Unit, onSettings: ()
             IconButton(onClick = onSettings) { Icon(Icons.Default.Settings, "Nastavitve", tint = Muted) }
         }
         Text(
-            "Fotografiraj balkon → fotografiraj svojo ograjo → realistična vizualizacija. " +
-                "Brez naročnine, brez računa, brez oblaka (razen če vklopiš lasten strežnik).",
+            "Fotografiraj prostor → izberi Roksal WoodCore profil → označi staro ograjo → " +
+                "vizualiziraj in pripravi strukturirano povpraševanje. " +
+                "Ročno popravljanje ostaja vedno na voljo.",
             style = MaterialTheme.typography.bodySmall, color = Muted,
         )
         Spacer(Modifier.height(14.dp))
@@ -114,7 +115,8 @@ private fun ProjectRow(p: Project, onOpen: () -> Unit, onDelete: () -> Unit) {
             Text(p.name, style = MaterialTheme.typography.titleSmall, color = Color(0xFFE8EAF0))
             Text(
                 "${fmt.format(Date(p.updatedAt))} · ${p.variants.size} variant · " +
-                    (if (p.scene != null) "📷 balkon" else "⚠️ brez fotografije"),
+                    (p.config?.let { "🧰 " + it.profileId + " · " + it.colourId } ?: "🧰 Roksal konfiguracija še ni izbrana") + " · " +
+                    (if (p.scene != null) "📷 prostor" else "⚠️ brez fotografije"),
                 style = MaterialTheme.typography.labelSmall, color = Muted,
             )
         }
