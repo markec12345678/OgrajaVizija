@@ -36,6 +36,9 @@ import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.launch
 import si.ograjavizija.app.data.AppState
 import si.ograjavizija.app.data.MeasurementStatus
+import si.ograjavizija.app.data.FenceType
+import si.ograjavizija.app.data.PostFixing
+import si.ograjavizija.app.data.PostAppearance
 import si.ograjavizija.app.data.MeasurementMethod
 import si.ograjavizija.app.data.DeliveryPreference
 import si.ograjavizija.app.data.Project
@@ -67,6 +70,7 @@ fun RoksalConfigScreen(
     var profile by remember { mutableStateOf<RoksalProfile?>(null) }
     var colourId by remember { mutableStateOf("BURMA_TEAK") }
     var surfaceId by remember { mutableStateOf("") }
+    var mountingVariant by remember { mutableStateOf("") }
     var handleIncluded by remember { mutableStateOf(true) }
     var gapMm by remember { mutableFloatStateOf(10f) }
     var privacy by remember { mutableStateOf(RoksalPrivacy.SREDNJA) }
@@ -84,6 +88,10 @@ fun RoksalConfigScreen(
     var gateType by remember { mutableStateOf("BREZ") }
     var gateWidth by remember { mutableFloatStateOf(1.0f) }
     var gateHeight by remember { mutableFloatStateOf(1.2f) }
+    var cuttingRequested by remember { mutableStateOf(true) }
+    var fenceType by remember { mutableStateOf(FenceType.NEVEM) }
+    var postFixing by remember { mutableStateOf(PostFixing.NEVEM) }
+    var postAppearance by remember { mutableStateOf(PostAppearance.NEVEM) }
     var customerName by remember { mutableStateOf("") }
     var phone by remember { mutableStateOf("") }
     var email by remember { mutableStateOf("") }
@@ -103,6 +111,7 @@ fun RoksalConfigScreen(
             orientation = old.orientation
             colourId = old.colourId
             surfaceId = old.surfaceId
+            mountingVariant = old.mountingVariant
             gapMm = old.boardGapMm.toFloat()
             privacy = old.privacy
             length = old.lengthM
@@ -119,6 +128,10 @@ fun RoksalConfigScreen(
             gateType = old.gateType
             gateWidth = old.gateWidthM
             gateHeight = old.gateHeightM
+            cuttingRequested = old.cuttingRequested
+            fenceType = old.fenceType
+            postFixing = old.postFixing
+            postAppearance = old.postAppearance
             customerName = old.customerName
             phone = old.phone
             email = old.email
@@ -153,6 +166,8 @@ fun RoksalConfigScreen(
             orientation = orientation,
             profileId = it.id,
             colourId = colourId,
+            surfaceId = surfaceId,
+            mountingVariant = mountingVariant,
             boardGapMm = gapMm.toInt(),
             privacy = privacy,
             lengthM = length,
@@ -162,6 +177,10 @@ fun RoksalConfigScreen(
             gateType = if (category == RoksalCategory.OGRAJA) gateType else "BREZ",
             gateWidthM = if (gateType == "BREZ") 0f else gateWidth,
             gateHeightM = if (gateType == "BREZ") 0f else gateHeight,
+            cuttingRequested = cuttingRequested,
+            fenceType = fenceType,
+            postFixing = postFixing,
+            postAppearance = postAppearance,
             handleIncluded = handleIncluded,
             existingStructure = existing,
             measurementStatus = measureStatus,
@@ -220,6 +239,22 @@ fun RoksalConfigScreen(
                 }
             }
             current?.let {
+                if (it.mountingOptions.isNotEmpty()) {
+                    Spacer(Modifier.height(8.dp))
+                    Text("Način polaganja profila", style = MaterialTheme.typography.titleSmall)
+                    Row(
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        modifier = Modifier.horizontalScroll(rememberScrollState())
+                    ) {
+                        it.mountingOptions.forEach { option ->
+                            FilterChip(
+                                selected = mountingVariant == option,
+                                onClick = { mountingVariant = option },
+                                label = { Text(option) }
+                            )
+                        }
+                    }
+                }
                 if (it.surfaceOptions.isNotEmpty()) {
                     Spacer(Modifier.height(8.dp))
                     Text("Površina", style = MaterialTheme.typography.titleSmall)
@@ -271,8 +306,27 @@ fun RoksalConfigScreen(
             )
 
             if (category == RoksalCategory.OGRAJA) {
+                Text("Tip ograje", style = MaterialTheme.typography.titleSmall)
+                Row(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.horizontalScroll(rememberScrollState())) {
+                    FilterChip(selected = fenceType == FenceType.BALKON, onClick = { fenceType = FenceType.BALKON }, label = { Text("Balkon") })
+                    FilterChip(selected = fenceType == FenceType.DVORISCE, onClick = { fenceType = FenceType.DVORISCE }, label = { Text("Dvorišče") })
+                    FilterChip(selected = fenceType == FenceType.NEVEM, onClick = { fenceType = FenceType.NEVEM }, label = { Text("Ne vem") })
+                }
+                Spacer(Modifier.height(8.dp))
+                Text("Konstrukcija", style = MaterialTheme.typography.titleSmall)
+                Row(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.horizontalScroll(rememberScrollState())) {
+                    FilterChip(selected = postFixing == PostFixing.NA_PLOSCI, onClick = { postFixing = PostFixing.NA_PLOSCI }, label = { Text("Na plošči") })
+                    FilterChip(selected = postFixing == PostFixing.BOCNO, onClick = { postFixing = PostFixing.BOCNO }, label = { Text("Bočno") })
+                    FilterChip(selected = postFixing == PostFixing.NEVEM, onClick = { postFixing = PostFixing.NEVEM }, label = { Text("Ne vem") })
+                }
+                Row(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.horizontalScroll(rememberScrollState())) {
+                    FilterChip(selected = postAppearance == PostAppearance.OBOJE, onClick = { postAppearance = PostAppearance.OBOJE }, label = { Text("Vidno z obeh strani") })
+                    FilterChip(selected = postAppearance == PostAppearance.SKRITO_ZUNAJ, onClick = { postAppearance = PostAppearance.SKRITO_ZUNAJ }, label = { Text("Skrito od zunaj") })
+                    FilterChip(selected = postAppearance == PostAppearance.NEVEM, onClick = { postAppearance = PostAppearance.NEVEM }, label = { Text("Ne vem") })
+                }
                 Spacer(Modifier.height(8.dp))
                 FilterChip(
+                    selected = handleIncluded,
                     selected = handleIncluded,
                     onClick = { handleIncluded = !handleIncluded },
                     label = { Text(if (handleIncluded) "Vključi zgornji ročaj" else "Brez zgornjega ročaja") }
