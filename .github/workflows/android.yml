@@ -19,19 +19,24 @@ jobs:
       - name: Build debug + release APK
         working-directory: android
         run: |
-          chmod +x gradlew 2>/dev/null || true
-          gradle --version || true
-          # wrapper ni nujno potreben; CI lahko uporabi sistemskega ali pa nalozi dist
-          if [ ! -f gradlew ]; then
-            curl -sL https://services.gradle.org/distributions/gradle-8.10.2-bin.zip -o /tmp/g.zip
-            python3 -c "import zipfile;zipfile.ZipFile('/tmp/g.zip').extractall('/opt')"
-            export PATH=/opt/gradle-8.10.2/bin:$PATH
+          if [ -f gradlew ]; then
+            chmod +x gradlew
+            GRADLE_BIN=./gradlew
+          else
+            curl -sL https://services.gradle.org/distributions/gradle-8.10.2-bin.zip -o "$RUNNER_TEMP/g.zip"
+            python3 -c "import zipfile,os;zipfile.ZipFile(os.environ['RUNNER_TEMP']+'/g.zip').extractall(os.environ['RUNNER_TEMP']+'/gradle')"
+            chmod +x "$RUNNER_TEMP/gradle/gradle-8.10.2/bin/gradle"
+            GRADLE_BIN="$RUNNER_TEMP/gradle/gradle-8.10.2/bin/gradle"
           fi
-          gradle --no-daemon :app:assembleDebug :app:assembleRelease
+          "$GRADLE_BIN" --no-daemon :app:assembleDebug :app:assembleRelease
 
       - name: JVM core tests (geometrija, zascita originala)
         working-directory: tools/jvmtest
+        env:
+          GRADLE_CACHE: ${{ github.workspace }}/android/build/../../.jvmtest-cache
         run: |
+          # testi potrebujejo kotlin-compiler-embeddable; ce ga ni v gradle cacheu,
+          # run_core_tests.sh ga prenese sam z Maven Central
           bash run_core_tests.sh || exit 1
 
       - uses: actions/upload-artifact@v4

@@ -13,3 +13,4 @@ __pycache__/
 *.pyc
 backend/.venv/
 docs/slike/
+hs_err_pid*.log
