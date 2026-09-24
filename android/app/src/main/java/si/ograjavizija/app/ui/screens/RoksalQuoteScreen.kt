@@ -88,7 +88,12 @@ fun RoksalQuoteScreen(
                 appendLine("Stebri: " + estimate.posts)
                 appendLine("Nosilci/povezave: " + estimate.supports)
                 appendLine("Vijaki: " + estimate.screws)
+                appendLine("Ročaji: " + estimate.handles)
                 appendLine("Predviden odpad: ~" + estimate.estimatedWastePercent + "%")
+                if (estimate.components.isNotEmpty()) {
+                    appendLine("Predlagane komponente:")
+                    estimate.components.forEach { component -> appendLine("- " + component.name + " (" + component.unit + ")") }
+                }
             }
             appendLine()
             appendLine("Opombe: " + (c?.notes ?: ""))
