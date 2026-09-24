@@ -140,6 +140,7 @@ private fun ProjectAdminRow(project: Project, onChanged: () -> Unit) {
 private fun statusLabel(status: ProjectStatus): String = when (status) {
     ProjectStatus.DRAFT -> "Osnutek"
     ProjectStatus.CONFIGURED -> "Konfigurirano"
+    ProjectStatus.QUOTE_PREPARED -> "Povpraševanje pripravljeno"
     ProjectStatus.VISUALIZED -> "Vizualizirano"
     ProjectStatus.QUOTE_REQUESTED -> "Povpraševanje"
     ProjectStatus.ROKSAL_REVIEW -> "Roksal pregled"
