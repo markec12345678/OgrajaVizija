@@ -52,6 +52,7 @@ fun MaskScreen(projectId: String?, onNext: () -> Unit, onBack: () -> Unit) {
     var status by remember { mutableStateOf("") }
     var rectStart by remember { mutableStateOf<Pair<Float, Float>?>(null) }
     var segReady by remember { mutableStateOf(false) }
+    var autoBusy by remember { mutableStateOf(false) }
     val sceneImage = remember(scene) { scene?.copy(android.graphics.Bitmap.Config.ARGB_8888, false)?.asImageBitmap() }
     val maskImage = remember(maskBmp) { maskBmp?.asImageBitmap() }
 
