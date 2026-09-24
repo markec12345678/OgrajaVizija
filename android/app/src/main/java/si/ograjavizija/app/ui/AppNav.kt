@@ -53,7 +53,8 @@ fun AppNav() {
         )
 
         Route.PROJECTS -> RoksalProjectsScreen(
-            onBack = { route = Route.HOME }
+            onBack = { route = Route.HOME },
+            onSettings = { route = Route.SETTINGS },
         )
 
         Route.SCENE -> SceneScreen(
