@@ -16,6 +16,8 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
+import androidx.compose.material3.Checkbox
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
@@ -66,6 +68,7 @@ fun RoksalConfigScreen(
     onBack: () -> Unit,
 ) {
     val scope = rememberCoroutineScope()
+    val context = androidx.compose.ui.platform.LocalContext.current
     var project by remember { mutableStateOf<Project?>(null) }
     var category by remember { mutableStateOf(RoksalCategory.OGRAJA) }
     var orientation by remember { mutableStateOf(RoksalOrientation.POKONCNA) }
@@ -105,6 +108,9 @@ fun RoksalConfigScreen(
     var email by remember { mutableStateOf("") }
     var address by remember { mutableStateOf("") }
     var notes by remember { mutableStateOf("") }
+    var dataConsent by remember { mutableStateOf(false) }
+    var termsAccepted by remember { mutableStateOf(false) }
+    var newsletterOptIn by remember { mutableStateOf(false) }
     var status by remember { mutableStateOf("") }
     var showRecommendations by remember { mutableStateOf(false) }
 
@@ -152,6 +158,9 @@ fun RoksalConfigScreen(
             email = old.email
             address = old.address
             notes = old.notes
+            dataConsent = old.dataProcessingConsent
+            termsAccepted = old.termsAccepted
+            newsletterOptIn = old.newsletterOptIn
         }
     }
 
@@ -214,6 +223,10 @@ fun RoksalConfigScreen(
             deliveryAddressDifferent = deliveryAddressDifferent,
             deliveryAddress = deliveryAddress,
             address = address,
+            dataProcessingConsent = dataConsent,
+            termsAccepted = termsAccepted,
+            newsletterOptIn = newsletterOptIn,
+            consentAtMillis = if (dataConsent || termsAccepted || newsletterOptIn) System.currentTimeMillis() else 0L,
             notes = notes,
         )
     }
@@ -296,6 +309,18 @@ fun RoksalConfigScreen(
                 }
             }
             current?.let {
+                OutlinedButton(
+                    onClick = {
+                        val intent = android.content.Intent(
+                            android.content.Intent.ACTION_VIEW,
+                            android.net.Uri.parse(it.catalogUrl)
+                        )
+                        context.startActivity(
+                            android.content.Intent.createChooser(intent, "Odpri Roksal katalog")
+                        )
+                    },
+                    modifier = Modifier.fillMaxWidth()
+                ) { Text("🌐 Odpri uradni Roksal katalog") }
                 if (it.mountingOptions.isNotEmpty()) {
                     Spacer(Modifier.height(8.dp))
                     Text("Način polaganja profila", style = MaterialTheme.typography.titleSmall)
@@ -564,6 +589,21 @@ fun RoksalConfigScreen(
             }
             Spacer(Modifier.height(6.dp))
             OutlinedTextField(notes, { notes = it }, label = { Text("Opombe") }, modifier = Modifier.fillMaxWidth(), minLines = 2)
+
+            Spacer(Modifier.height(8.dp))
+            Text("Pred oddajo povpraševanja", style = MaterialTheme.typography.titleSmall)
+            Row(verticalAlignment = androidx.compose.ui.Alignment.CenterVertically) {
+                Checkbox(checked = dataConsent, onCheckedChange = { dataConsent = it })
+                Text("Strinjam se z obdelavo osebnih podatkov za odgovor na povpraševanje.", style = MaterialTheme.typography.bodySmall)
+            }
+            Row(verticalAlignment = androidx.compose.ui.Alignment.CenterVertically) {
+                Checkbox(checked = termsAccepted, onCheckedChange = { termsAccepted = it })
+                Text("Seznanjen/-a sem s splošnimi pogoji Roksala.", style = MaterialTheme.typography.bodySmall)
+            }
+            Row(verticalAlignment = androidx.compose.ui.Alignment.CenterVertically) {
+                Checkbox(checked = newsletterOptIn, onCheckedChange = { newsletterOptIn = it })
+                Text("Želim prejemati e-novice (neobvezno).", style = MaterialTheme.typography.bodySmall)
+            }
 
             Spacer(Modifier.height(10.dp))
             estimate?.let {
