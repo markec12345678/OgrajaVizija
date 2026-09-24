@@ -1,0 +1,3 @@
+# Postavitev za demo: desni balkon na testni fotografiji (normalizirane koordinate).
+corners=0.555,0.155 0.885,0.355 0.885,0.610 0.555,0.430
+poly=0.545,0.140 0.895,0.345 0.895,0.625 0.545,0.445

@@ -1,0 +1,16 @@
+# Jedro (vedno): samo FastAPI + CV. Vse AI tezko je OPciJSKO (glej [extra]).
+fastapi==0.115.6
+uvicorn[standard]==0.34.0
+python-multipart==0.0.20
+pillow==11.1.0
+numpy==2.2.1
+opencv-python-headless==4.10.0.84
+
+# [lama] odstranjevanje stare ograje (CPU OK)
+# pip install -e ".[lama]"
+# simple-lama-inpainting==0.4.0   # ali uporabi iopaint/lama neposredno
+
+# [diffusion] AI finalizacija (NUJNO GPU ~8-13 GB VRAM)
+# torch, diffusers, transformers, accelerate, safetensors
+
+# Opomba: noben zunanji PLACLJIVI API ni obvezen. Vse tece lokalno.

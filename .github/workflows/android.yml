@@ -1,0 +1,45 @@
+name: android-apk
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  apk:
+    runs-on: ubuntu-latest           # 7 GB RAM — dovolj za AGP + Compose
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+
+      - name: Build debug + release APK
+        working-directory: android
+        run: |
+          chmod +x gradlew 2>/dev/null || true
+          gradle --version || true
+          # wrapper ni nujno potreben; CI lahko uporabi sistemskega ali pa nalozi dist
+          if [ ! -f gradlew ]; then
+            curl -sL https://services.gradle.org/distributions/gradle-8.10.2-bin.zip -o /tmp/g.zip
+            python3 -c "import zipfile;zipfile.ZipFile('/tmp/g.zip').extractall('/opt')"
+            export PATH=/opt/gradle-8.10.2/bin:$PATH
+          fi
+          gradle --no-daemon :app:assembleDebug :app:assembleRelease
+
+      - name: JVM core tests (geometrija, zascita originala)
+        working-directory: tools/jvmtest
+        run: |
+          bash run_core_tests.sh || exit 1
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: apk-debug
+          path: android/app/build/outputs/apk/debug/*.apk
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: apk-release-unsigned
+          path: android/app/build/outputs/apk/release/*.apk

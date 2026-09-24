@@ -1,0 +1,15 @@
+.gradle/
+.gradle-home/
+build/
+out/
+local.properties
+.idea/
+*.iml
+.DS_Store
+research/base/
+tools/jvmtest/out/
+tools/jvmtest/classes/
+__pycache__/
+*.pyc
+backend/.venv/
+docs/slike/

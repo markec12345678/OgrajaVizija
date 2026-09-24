@@ -1,0 +1,29 @@
+# NOTICE — avtorske pravice in licence tretjih oseb
+
+Ta projekt (OgrajaVizija) je originalno delo, ki pa uporablja in/ali navdihuje
+naslednje odprtokodne projekte. Njihove licence OSTANEJO v veljavi za njihovo kodo.
+
+1. **AI-Photo-Object-Editor** — https://github.com/nazarpalamarenkoo-ui/AI-Photo-Object-Editor
+   Licenca: MIT (Copyright (c) 2026 nazarpalamarenkoo-ui)
+   Uporaba: arhitekturna referenca (pipeline detection/segmentation/removal/replacement,
+   async-job vzorec, color matching). Izvirna koda ni kopirana; MIT obvestilo ostane tu.
+
+   > MIT License
+   > Permission is hereby granted, free of charge, to any person obtaining a copy
+   > of this software and associated documentation files (the "Software"), to deal
+   > in the Software without restriction, including without limitation the rights
+   > to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+   > copies of the Software ...
+
+2. **LaMa** (advimman/lama) — Apache-2.0 · odstranjevanje objektov
+3. **BiRefNet** (ZhengPeng7/BiRefNet) — MIT · odstranjevanje ozadja
+4. **MediaPipe** (google-ai-edge) — Apache-2.0 · tap-segmentacija na napravi
+5. **FLUX.2 [klein] 4B** (black-forest-labs) — Apache-2.0 · AI finalizacija
+6. **Qwen-Image-Edit-2511** (QwenLM) — Apache-2.0 · alternativna AI finalizacija
+7. **MobileSAM / SAM / SAM 3** — MobileSAM/SAM2 Apache-2.0; SAM 3 pod "SAM License"
+   (samo strežnik, opcija)
+8. **AndroidX / Jetpack Compose / CameraX** — Apache-2.0
+9. Testne fotografije v `tools/jvmtest/out` izhajajo iz spletnega iskanja in so
+   uporabljene SAMO za interno validacijo pipeline-a; niso del distribucije.
+
+Za celotno originalno kodo tega repoja velja: **Apache License 2.0** (glej LICENSE).
