@@ -49,7 +49,7 @@ import java.util.Date
 import java.util.Locale
 
 @Composable
-fun HomeScreen(onNew: (String) -> Unit, onOpen: (String) -> Unit, onSettings: () -> Unit) {
+fun HomeScreen(onNew: (String) -> Unit, onOpen: (String) -> Unit, onSettings: () -> Unit, onProjects: () -> Unit) {
     val scope = rememberCoroutineScope()
     var name by remember { mutableStateOf("") }
     var projects by remember { mutableStateOf(ProjectStore.list()) }
@@ -88,6 +88,14 @@ fun HomeScreen(onNew: (String) -> Unit, onOpen: (String) -> Unit, onSettings: ()
             shape = RoundedCornerShape(14.dp),
         ) {
             Icon(Icons.Default.Add, null); Text("  Nova vizualizacija", style = MaterialTheme.typography.titleMedium)
+        }
+
+        Spacer(Modifier.height(8.dp))
+        androidx.compose.material3.OutlinedButton(
+            onClick = onProjects,
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Text("Roksal · interni projekti")
         }
 
         Spacer(Modifier.height(18.dp))
